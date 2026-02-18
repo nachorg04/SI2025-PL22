@@ -49,12 +49,14 @@ public class AppMainView {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
+                	// Instanciamos el modelo
+                	app.model.AppMainModel modelo = new app.model.AppMainModel();
                     // Instanciamos la vista
                     AppMainView vista = new AppMainView();
                     
                     // Instanciamos el controlador y le "inyectamos" la vista
                     // El controlador se encarga de darle vida a los botones
-                    AppMainController controlador = new AppMainController(vista);
+                    AppMainController controlador = new AppMainController(vista,modelo);
                     
                     // Mostramos la ventana
 

@@ -1,7 +1,11 @@
 package app.controller;
 
+import java.util.List;
+
 import javax.swing.JOptionPane;
 
+import app.dto.AppMainDTO;
+import app.model.AppMainModel;
 import app.view.AppMainView;
 import giis.demo.util.Database; // Asumo que esta es la ruta de tu BD según mensajes anteriores
 import giis.demo.util.SwingUtil;
@@ -9,12 +13,14 @@ import giis.demo.util.SwingUtil;
 public class AppMainController {
 
     private AppMainView view;
+    private AppMainModel model;
 
     /**
      * Constructor del Controlador. Recibe la vista como parámetro.
      */
-    public AppMainController(AppMainView v) {
+    public AppMainController(AppMainView v, AppMainModel m) {
         this.view = v;
+        this.model = m;
         
         // Inicializamos los "escuchadores" de eventos
         this.initView();
@@ -25,7 +31,8 @@ public class AppMainController {
      * Este método enlaza los botones de la Vista con la lógica del Controlador
      */
     private void initController() {
-        
+        // Hacemos visible la ventana
+        view.getFrame().setVisible(true);
         // ==========================================
         // EVENTOS DE LA BASE DE DATOS
         // ==========================================
@@ -47,6 +54,27 @@ public class AppMainController {
     }
     
     public void initView() {
+    	view.getComboReportero().removeAllItems();
+        view.getComboAgente().removeAllItems();
+        view.getComboEmpresa().removeAllItems();
+        
+     // 2. Pedimos los datos al modelo y rellenamos Reporteros
+        List<AppMainDTO> reporteros = model.getListaReporteros();
+        for (AppMainDTO rep : reporteros) {
+            view.getComboReportero().addItem(rep.getNombre());
+        }
+
+        // 3. Rellenamos Agencias (Para el combo del Agente)
+        List<AppMainDTO> agencias = model.getListaAgencias();
+        for (AppMainDTO agencia : agencias) {
+            view.getComboAgente().addItem(agencia.getNombre());
+        }
+
+        // 4. Rellenamos Empresas
+        List<AppMainDTO> empresas = model.getListaEmpresas();
+        for (AppMainDTO emp : empresas) {
+            view.getComboEmpresa().addItem(emp.getNombre());
+        }
 		view.getFrame().setVisible(true);
 		// Agregar artículos a la lista.
 	}
