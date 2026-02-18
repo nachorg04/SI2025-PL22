@@ -54,27 +54,7 @@ public class AppMainController {
     }
     
     public void initView() {
-    	view.getComboReportero().removeAllItems();
-        view.getComboAgente().removeAllItems();
-        view.getComboEmpresa().removeAllItems();
-        
-     // 2. Pedimos los datos al modelo y rellenamos Reporteros
-        List<AppMainDTO> reporteros = model.getListaReporteros();
-        for (AppMainDTO rep : reporteros) {
-            view.getComboReportero().addItem(rep.getNombre());
-        }
-
-        // 3. Rellenamos Agencias (Para el combo del Agente)
-        List<AppMainDTO> agencias = model.getListaAgencias();
-        for (AppMainDTO agencia : agencias) {
-            view.getComboAgente().addItem(agencia.getNombre());
-        }
-
-        // 4. Rellenamos Empresas
-        List<AppMainDTO> empresas = model.getListaEmpresas();
-        for (AppMainDTO emp : empresas) {
-            view.getComboEmpresa().addItem(emp.getNombre());
-        }
+    	actualizarComboBoxes();
 		view.getFrame().setVisible(true);
 		// Agregar artículos a la lista.
 	}
@@ -84,12 +64,16 @@ public class AppMainController {
         System.out.println("Controlador: Creando base de datos en blanco...");
         Database db = new Database();
         db.createDatabase(false);
+        
+        actualizarComboBoxes();
     }
 
     private void cargarBaseDeDatos() {
         System.out.println("Controlador: Cargando datos de prueba...");
         Database db = new Database();
         db.loadDatabase();
+        
+        actualizarComboBoxes();
     }
 
     // --- Lógica del Reportero ---
@@ -132,5 +116,34 @@ public class AppMainController {
         String empresaSeleccionada = (String) view.getComboEmpresa().getSelectedItem();
         System.out.println("Empresa seleccionada: " + empresaSeleccionada);
         System.out.println("Controlador: Ejecutando acción 1 de la Empresa.");
+    }
+    
+    /**
+     * Limpia y vuelve a cargar los datos de los ComboBoxes desde la base de datos.
+     */
+    private void actualizarComboBoxes() {
+        // 1. Limpiamos los comboboxes por si tenían datos viejos
+        view.getComboReportero().removeAllItems();
+        view.getComboAgente().removeAllItems();
+        view.getComboEmpresa().removeAllItems();
+
+        // 2. Pedimos los datos al modelo y rellenamos Reporteros
+        // (Asegúrate de tener importada app.dto.RolDisplayDTO arriba)
+        java.util.List<app.dto.AppMainDTO> reporteros = model.getListaReporteros();
+        for (app.dto.AppMainDTO rep : reporteros) {
+            view.getComboReportero().addItem(rep.getNombre());
+        }
+
+        // 3. Rellenamos Agencias (Para el combo del Agente)
+        java.util.List<app.dto.AppMainDTO> agencias = model.getListaAgencias();
+        for (app.dto.AppMainDTO agencia : agencias) {
+            view.getComboAgente().addItem(agencia.getNombre());
+        }
+
+        // 4. Rellenamos Empresas
+        java.util.List<app.dto.AppMainDTO> empresas = model.getListaEmpresas();
+        for (app.dto.AppMainDTO emp : empresas) {
+            view.getComboEmpresa().addItem(emp.getNombre());
+        }
     }
 }
