@@ -30,6 +30,8 @@ INSERT INTO Evento (id_evento, descripcion, fecha, id_agencia) VALUES (6, 'Feria
 INSERT INTO Evento (id_evento, descripcion, fecha, id_agencia) VALUES (7, 'Festival Internacional de Cine de Gijon', '2026-11-15', 3);
 INSERT INTO Evento (id_evento, descripcion, fecha, id_agencia) VALUES (8, 'Huelga del sector del metal', '2026-03-22', 2);
 
+
+
 INSERT INTO Asignacion (id_evento, id_reportero) VALUES (1, 1);
 INSERT INTO Asignacion (id_evento, id_reportero) VALUES (1, 9);
 INSERT INTO Asignacion (id_evento, id_reportero) VALUES (2, 3);

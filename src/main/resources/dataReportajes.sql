@@ -29,6 +29,8 @@ INSERT INTO Evento (id_evento, descripcion, fecha, id_agencia) VALUES (5, 'Conci
 INSERT INTO Evento (id_evento, descripcion, fecha, id_agencia) VALUES (6, 'Feria Internacional de Muestras (FIDMA)', '2026-08-01', 3);
 INSERT INTO Evento (id_evento, descripcion, fecha, id_agencia) VALUES (7, 'Festival Internacional de Cine de Gijon', '2026-11-15', 3);
 INSERT INTO Evento (id_evento, descripcion, fecha, id_agencia) VALUES (8, 'Huelga del sector del metal', '2026-03-22', 2);
+INSERT INTO Evento (id_evento, descripcion, fecha, id_agencia) VALUES (99, 'Evento Libre de Prueba', '2026-12-01', 1);
+INSERT INTO Evento (id_evento, descripcion, fecha, id_agencia) VALUES (100, 'Otra Rueda de Prensa sin asignar', '2026-12-05', 1);
 
 INSERT INTO Asignacion (id_evento, id_reportero) VALUES (1, 1);
 INSERT INTO Asignacion (id_evento, id_reportero) VALUES (1, 9);
