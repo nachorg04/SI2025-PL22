@@ -2,6 +2,8 @@ package app.controller;
 
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableModel;
 
 import app.dto.gestionarOfrecimientosReportajesDTO;
@@ -14,6 +16,9 @@ public class gestionarOfrecimientosReportajesController {
     private gestionarOfrecimientosReportajesModel model;
     private gestionarOfrecimientosReportajesView view;
     private String nombreEmpresaActual;
+    
+    // Guardamos la lista actual para poder consultar el DTO cuando seleccionen una fila
+    private List<gestionarOfrecimientosReportajesDTO> listaMostrada; 
 
     public gestionarOfrecimientosReportajesController(gestionarOfrecimientosReportajesModel m, gestionarOfrecimientosReportajesView v, String nombreEmpresa) {
         this.model = m;
@@ -25,9 +30,25 @@ public class gestionarOfrecimientosReportajesController {
     }
 
     private void initController() {
+        // Botones de acción
         view.addAceptarListener(e -> tomarDecision("ACEPTADO"));
         view.addRechazarListener(e -> tomarDecision("RECHAZADO"));
+        view.addEliminarDecisionListener(e -> tomarDecision("PENDIENTE")); // Volver a pendiente es eliminarla
         view.addVolverListener(e -> view.getFrame().dispose());
+        
+        // Listener para los Radio Buttons (Filtro)
+        view.addFiltroListener(e -> cargarTabla());
+        
+        // --- LA MAGIA DEL BLOQUEO (Cumple el criterio de la HU) ---
+        view.getTabOfrecimientos().getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                // Solo ejecutamos si el usuario ha terminado de hacer clic
+                if (!event.getValueIsAdjusting()) {
+                    evaluarBloqueoBotones();
+                }
+            }
+        });
     }
 
     public void initView() {
@@ -37,38 +58,78 @@ public class gestionarOfrecimientosReportajesController {
     }
 
     private void cargarTabla() {
-        List<gestionarOfrecimientosReportajesDTO> pendientes = model.getOfrecimientosPendientes(nombreEmpresaActual);
+        // 1. Miramos qué filtro está seleccionado
+        if (view.getRdbtnPendientes().isSelected()) {
+            listaMostrada = model.getOfrecimientosPendientes(nombreEmpresaActual);
+            // Si estamos en PENDIENTES, el botón de eliminar no tiene sentido
+            view.getBtnEliminarDecision().setVisible(false);
+        } else {
+            listaMostrada = model.getOfrecimientosConDecision(nombreEmpresaActual);
+            // Si estamos viendo el historial, el botón de eliminar aparece
+            view.getBtnEliminarDecision().setVisible(true);
+        }
         
-        TableModel tmodel = SwingUtil.getTableModelFromPojos(pendientes, 
-                new String[] {"idEvento", "descripcionEvento", "fechaEvento", "nombreAgencia"});
+        // 2. Cargamos la tabla incluyendo el estado y la columna "accesoVisible" que fabricamos en el DTO
+        TableModel tmodel = SwingUtil.getTableModelFromPojos(listaMostrada, 
+                new String[] {"idEvento", "descripcionEvento", "fechaEvento", "nombreAgencia", "estado", "accesoVisible"});
         
         view.getTabOfrecimientos().setModel(tmodel);
         SwingUtil.autoAdjustColumns(view.getTabOfrecimientos());
+        
+        // 3. Al recargar la tabla, deseleccionamos todo y reseteamos los botones
+        evaluarBloqueoBotones(); 
     }
 
-    private void tomarDecision(String decision) {
-        // 1. Obtenemos qué fila ha seleccionado el usuario
-        int filaSeleccionada = view.getTabOfrecimientos().getSelectedRow();
-        String idEventoSeleccionado = SwingUtil.getSelectedKey(view.getTabOfrecimientos());
+    /**
+     * Este método se ejecuta cada vez que el usuario hace clic en una fila.
+     * Es el responsable de encender/apagar los botones según las reglas del profesor.
+     */
+    private void evaluarBloqueoBotones() {
+        int filaSel = view.getTabOfrecimientos().getSelectedRow();
         
-        if (idEventoSeleccionado.isEmpty() || filaSeleccionada == -1) {
-            SwingUtil.showMessage("Por favor, selecciona un ofrecimiento de la tabla superior primero.", "Aviso", JOptionPane.WARNING_MESSAGE);
+        // Si no hay nada seleccionado, apagamos todo y salimos
+        if (filaSel == -1) {
+            view.getBtnAceptar().setEnabled(false);
+            view.getBtnRechazar().setEnabled(false);
+            view.getBtnEliminarDecision().setEnabled(false);
             return;
         }
 
-        // 2. EXTRAER DATOS PARA EL HISTORIAL (Antes de recargar la tabla)
-        // Sabemos que la columna 1 es la 'descripcionEvento' y la 3 es el 'nombreAgencia' según el array de cargarTabla()
-        String descEvento = (String) view.getTabOfrecimientos().getValueAt(filaSeleccionada, 1);
-        String agencia = (String) view.getTabOfrecimientos().getValueAt(filaSeleccionada, 3);
+        // Recuperamos el DTO de la fila seleccionada usando nuestra lista guardada
+        gestionarOfrecimientosReportajesDTO dtoSeleccionado = listaMostrada.get(filaSel);
 
-        // 3. Actualizamos en base de datos
-        model.actualizarEstadoOfrecimiento(idEventoSeleccionado, nombreEmpresaActual, decision);
+        // CRITERIO DE ACEPTACIÓN: "Si se aceptó y ya se tiene acceso, no se podrá cambiar la decisión"
+        boolean estaAceptado = "ACEPTADO".equals(dtoSeleccionado.getEstado());
+        boolean tieneAcceso = dtoSeleccionado.getTieneAcceso() != null && dtoSeleccionado.getTieneAcceso() == 1;
+
+        if (estaAceptado && tieneAcceso) {
+            // ¡BLOQUEO TOTAL!
+            view.getBtnAceptar().setEnabled(false);
+            view.getBtnRechazar().setEnabled(false);
+            view.getBtnEliminarDecision().setEnabled(false);
+        } else {
+            // Vía libre: El usuario puede usar los botones
+            view.getBtnAceptar().setEnabled(true);
+            view.getBtnRechazar().setEnabled(true);
+            view.getBtnEliminarDecision().setEnabled(true);
+        }
+    }
+
+    private void tomarDecision(String nuevaDecision) {
+        String idEventoSeleccionado = SwingUtil.getSelectedKey(view.getTabOfrecimientos());
+        if (idEventoSeleccionado.isEmpty()) return;
+
+        // Actualizamos en la BD
+        model.actualizarEstadoOfrecimiento(idEventoSeleccionado, nombreEmpresaActual, nuevaDecision);
         
-        // 4. AÑADIMOS LA DECISIÓN AL HISTORIAL VISUAL
-        String etiquetaDecision = decision.equals("ACEPTADO") ? "✅ ACEPTADO" : "❌ RECHAZADO";
-        view.agregarAlHistorial(etiquetaDecision, descEvento, agencia);
+        // Feedback al usuario (Excepto si fue "Eliminar decisión", que cambiamos el texto)
+        if (nuevaDecision.equals("PENDIENTE")) {
+            SwingUtil.showMessage("La decisión ha sido eliminada. El ofrecimiento vuelve a estar PENDIENTE.", "Información", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            SwingUtil.showMessage("El ofrecimiento ha sido marcado como: " + nuevaDecision, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        }
         
-        // 5. Refrescamos la tabla superior (el ofrecimiento desaparecerá porque ya no es PENDIENTE)
+        // Refrescamos la tabla para que la fila desaparezca (o cambie de estado)
         cargarTabla();
     }
 }
