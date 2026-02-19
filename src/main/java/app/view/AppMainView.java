@@ -160,7 +160,7 @@ public class AppMainView {
         gbc_panelBotonesReportero.gridy = 2;
         panelCentral.add(panelBotonesReportero, gbc_panelBotonesReportero);
         
-        btnAccionReportero1 = new JButton("Gestionar ofrecimientos de reportajes");
+        btnAccionReportero1 = new JButton("Acción Reportero 1");
         panelBotonesReportero.add(btnAccionReportero1);
         
         // Columna 2: Botones de Agente de Prensa
@@ -186,7 +186,7 @@ public class AppMainView {
         gbc_panelBotonesEmpresa.gridy = 2;
         panelCentral.add(panelBotonesEmpresa, gbc_panelBotonesEmpresa);
         
-        btnAccionEmpresa1 = new JButton("Acción Empresa 1");
+        btnAccionEmpresa1 = new JButton("Gestionar ofrecimientos de reportajes");
         panelBotonesEmpresa.add(btnAccionEmpresa1);
 
 
