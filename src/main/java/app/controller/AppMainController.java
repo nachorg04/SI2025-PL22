@@ -108,42 +108,55 @@ public class AppMainController {
 
     // --- Lógica de la Empresa ---
     private void ejecutarAccionEmpresa1() {
-    	//Mensaje de error si no se ha seleccionado ninguna empresa en el combobox
-    	if (view.getComboEmpresa().getSelectedItem() == null) {
-			SwingUtil.showMessage("Debes seleccionar una empresa", "ERROR", JOptionPane.ERROR_MESSAGE);
-			return;
-    	}
+        if (view.getComboEmpresa().getSelectedItem() == null) {
+            SwingUtil.showMessage("Debes seleccionar una empresa", "ERROR", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         String empresaSeleccionada = (String) view.getComboEmpresa().getSelectedItem();
-        System.out.println("Empresa seleccionada: " + empresaSeleccionada);
-        System.out.println("Controlador: Ejecutando acción 1 de la Empresa.");
+        
+        // ¡Magia! Creamos el Modelo, la Vista y el Controlador de la nueva pantalla
+        app.model.gestionarOfrecimientosReportajesModel ofreModel = new app.model.gestionarOfrecimientosReportajesModel();
+        app.view.gestionarOfrecimientosReportajesView ofreView = new app.view.gestionarOfrecimientosReportajesView();
+        
+        // Le pasamos el nombre de la empresa para que sepa de quién cargar los datos
+        new app.controller.gestionarOfrecimientosReportajesController(ofreModel, ofreView, empresaSeleccionada);
     }
     
     /**
      * Limpia y vuelve a cargar los datos de los ComboBoxes desde la base de datos.
      */
+    /**
+     * Limpia y vuelve a cargar los datos de los ComboBoxes desde la base de datos.
+     */
     private void actualizarComboBoxes() {
-        // 1. Limpiamos los comboboxes por si tenían datos viejos
-        view.getComboReportero().removeAllItems();
-        view.getComboAgente().removeAllItems();
-        view.getComboEmpresa().removeAllItems();
+        try {
+            // 1. Limpiamos los comboboxes por si tenían datos viejos
+            view.getComboReportero().removeAllItems();
+            view.getComboAgente().removeAllItems();
+            view.getComboEmpresa().removeAllItems();
 
-        // 2. Pedimos los datos al modelo y rellenamos Reporteros
-        // (Asegúrate de tener importada app.dto.RolDisplayDTO arriba)
-        java.util.List<app.dto.AppMainDTO> reporteros = model.getListaReporteros();
-        for (app.dto.AppMainDTO rep : reporteros) {
-            view.getComboReportero().addItem(rep.getNombre());
-        }
+            // 2. Pedimos los datos al modelo y rellenamos Reporteros
+            java.util.List<app.dto.AppMainDTO> reporteros = model.getListaReporteros();
+            for (app.dto.AppMainDTO rep : reporteros) {
+                view.getComboReportero().addItem(rep.getNombre());
+            }
 
-        // 3. Rellenamos Agencias (Para el combo del Agente)
-        java.util.List<app.dto.AppMainDTO> agencias = model.getListaAgencias();
-        for (app.dto.AppMainDTO agencia : agencias) {
-            view.getComboAgente().addItem(agencia.getNombre());
-        }
+            // 3. Rellenamos Agencias (Para el combo del Agente)
+            java.util.List<app.dto.AppMainDTO> agencias = model.getListaAgencias();
+            for (app.dto.AppMainDTO agencia : agencias) {
+                view.getComboAgente().addItem(agencia.getNombre());
+            }
 
-        // 4. Rellenamos Empresas
-        java.util.List<app.dto.AppMainDTO> empresas = model.getListaEmpresas();
-        for (app.dto.AppMainDTO emp : empresas) {
-            view.getComboEmpresa().addItem(emp.getNombre());
+            // 4. Rellenamos Empresas
+            java.util.List<app.dto.AppMainDTO> empresas = model.getListaEmpresas();
+            for (app.dto.AppMainDTO emp : empresas) {
+                view.getComboEmpresa().addItem(emp.getNombre());
+            }
+            
+        } catch (giis.demo.util.UnexpectedException e) {
+            // Si da error (por ejemplo, porque la tabla Reportero no existe aún), 
+            // atrapamos el error para que la aplicación NO crashee.
+            System.out.println("Aviso: Base de datos no inicializada. Los combos aparecerán vacíos.");
         }
     }
 }

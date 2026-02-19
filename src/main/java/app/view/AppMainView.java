@@ -81,7 +81,7 @@ public class AppMainView {
     	
         frame.setTitle("Login del Sistema");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setBounds(100, 100, 650, 450);
+        frame.setBounds(100, 100, 850, 450);
         frame.setLocationRelativeTo(null); // Centra la ventana al abrir
         
         contentPane = new JPanel();
@@ -160,7 +160,7 @@ public class AppMainView {
         gbc_panelBotonesReportero.gridy = 2;
         panelCentral.add(panelBotonesReportero, gbc_panelBotonesReportero);
         
-        btnAccionReportero1 = new JButton("Acción Reportero 1");
+        btnAccionReportero1 = new JButton("Gestionar ofrecimientos de reportajes");
         panelBotonesReportero.add(btnAccionReportero1);
         
         // Columna 2: Botones de Agente de Prensa
