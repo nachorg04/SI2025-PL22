@@ -1,14 +1,18 @@
 package app.dto;
 import lombok.*;
 
+
 public class EventoDisplayDTO {
-	private Integer id_evento;
+	private Integer idEvento;
 	private String descripcion;
 	private String fecha;
 
-	// Getters y Setters manuales
-	public Integer getId_evento() { return id_evento; }
-	public void setId_evento(Integer id_evento) { this.id_evento = id_evento; }
+	// Puerta para la tabla de Java
+	public Integer getIdEvento() { return idEvento; }
+	public void setIdEvento(Integer idEvento) { this.idEvento = idEvento; }
+
+	// TRUCO: Puerta secreta para que la Base de Datos meta el ID sin quejarse
+	public void setId_evento(Integer id_evento) { this.idEvento = id_evento; }
 
 	public String getDescripcion() { return descripcion; }
 	public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
