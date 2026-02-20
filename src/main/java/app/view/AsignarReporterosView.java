@@ -23,6 +23,8 @@ public class AsignarReporterosView extends JFrame {
 	private JButton btnAsignar;
 	private JButton btnCancelar;
 	private JButton btnAceptar;
+	
+	private JLabel lblNombreAgencia;
 
 	/**
 	 * Launch the application.
@@ -58,10 +60,10 @@ public class AsignarReporterosView extends JFrame {
 		tabEventos = new JTable();
 		scrollPane.setViewportView(tabEventos);
 
-		JLabel lblNewLabel = new JLabel("Agencia de Prensa : Mi Agencia");
-		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		lblNewLabel.setBounds(10, 9, 253, 14);
-		contentPane.add(lblNewLabel);
+		lblNombreAgencia = new JLabel("Agencia de Prensa : Mi Agencia");
+		lblNombreAgencia.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblNombreAgencia.setBounds(10, 9, 633, 32);
+		contentPane.add(lblNombreAgencia);
 
 		JLabel lblNewLabel_1 = new JLabel("Eventos");
 		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -130,4 +132,7 @@ public class AsignarReporterosView extends JFrame {
 	public javax.swing.JFrame getFrame() {
 		return this; 
 	}
+	  public javax.swing.JLabel getLblTituloAgencia() { 
+	        return this.lblNombreAgencia; 
+	    }
 }

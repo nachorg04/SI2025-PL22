@@ -44,6 +44,12 @@ public class AsignacionReporterosController {
 	}
 
 	public void initView() {
+
+		//  SOBRESCRIBIMOS el texto del Label estático por el dinámico
+		view.getLblTituloAgencia().setText("Agencia de Prensa: " + nombreAgencia);
+
+
+
 		List<app.dto.EventoDisplayDTO> eventos = model.getEventosSinAsignar(nombreAgencia);
 
 
@@ -80,19 +86,30 @@ public class AsignacionReporterosController {
 	}
 
 	private void moverReporteroAAsignados() {
-		int[] filasSeleccionadas = view.getTabDisponibles().getSelectedRows();
+		// 1. Comprobamos qué filas ha seleccionado el usuario
+		int filaEvento = view.getTabEventos().getSelectedRow();
+		int[] filasReporteros = view.getTabDisponibles().getSelectedRows();
 
-		// 1. Recogemos los reporteros seleccionados de la tabla central
-		List<ReporteroDisplayDTO> aMover = new ArrayList<>();
-		for (int fila : filasSeleccionadas) {
-			aMover.add(reporterosDisponiblesVisualmente.get(fila));
+		// 2. VALIDACIÓN: Freno de emergencia si no hay selección
+		if (filaEvento == -1 || filasReporteros.length == 0) {
+			giis.demo.util.SwingUtil.showMessage(
+					"No se puede asignar: Debes seleccionar un evento y al menos un reportero disponible.", 
+					"Aviso de Asignación", 
+					javax.swing.JOptionPane.WARNING_MESSAGE
+					);
+			return;
 		}
 
-		// 2. Los añadimos a la derecha y los quitamos de la izquierda
-		reporterosAsignadosVisualmente.addAll(aMover);
-		reporterosDisponiblesVisualmente.removeAll(aMover);
+		// 3. MOVIMIENTO DE DATOS (Lo que se nos había borrado al copiar)
+		// Recorremos las filas seleccionadas de abajo a arriba para no romper los índices al borrar
+		for (int i = filasReporteros.length - 1; i >= 0; i--) {
+			int fila = filasReporteros[i];
+			app.dto.ReporteroDisplayDTO reportero = reporterosDisponiblesVisualmente.get(fila);
+			reporterosAsignadosVisualmente.add(reportero);
+			reporterosDisponiblesVisualmente.remove(fila);
+		}
 
-		// 3. Refrescamos ambas tablas para ver la "magia"
+		// 4. REFRESCO DE LA PANTALLA
 		actualizarTablaDisponiblesVisualmente();
 		actualizarTablaAsignadosVisualmente();
 	}

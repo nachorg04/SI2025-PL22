@@ -173,7 +173,7 @@ public class AppMainView {
         gbc_panelBotonesAgente.gridy = 2;
         panelCentral.add(panelBotonesAgente, gbc_panelBotonesAgente);
         
-        btnAccionAgente1 = new JButton("Acción Agente 1");
+        btnAccionAgente1 = new JButton("Asignar Reporteros");
         panelBotonesAgente.add(btnAccionAgente1);
 
         // Columna 3: Botones de Empresa de Comunicación
