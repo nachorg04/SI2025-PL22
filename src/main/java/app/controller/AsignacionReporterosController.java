@@ -15,13 +15,15 @@ import app.view.AsignarReporterosView;
 
 public class AsignacionReporterosController {
 
+	private String nombreAgencia;
 	private AsignacionReporterosModel model;
 	private AsignarReporterosView view;
 	private List<ReporteroDisplayDTO> reporterosAsignadosVisualmente;
 
-	public AsignacionReporterosController(AsignacionReporterosModel m, AsignarReporterosView v) {
+	public AsignacionReporterosController(AsignacionReporterosModel m, AsignarReporterosView v, String nombreAgencia) {
 		this.model = m;
 		this.view = v;
+		this.nombreAgencia = nombreAgencia; // Guardamos el nombre de la agencia seleccionada
 		this.reporterosAsignadosVisualmente = new ArrayList<>();
 		this.initView();
 	}
@@ -41,7 +43,7 @@ public class AsignacionReporterosController {
 	}
 
 	public void initView() {
-		List<EventoDisplayDTO> eventos = model.getEventosSinAsignar();
+		List<EventoDisplayDTO> eventos = model.getEventosSinAsignar(nombreAgencia);
 		// Usamos los nombres exactos de tu DTO original: id_evento
 		TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[]{"id_evento", "descripcion", "fecha"});
 		view.getTabEventos().setModel(tmodel);
@@ -56,7 +58,7 @@ public class AsignacionReporterosController {
 
 			String fecha = (String) view.getTabEventos().getValueAt(filaSeleccionada, 2);
 
-			List<ReporteroDisplayDTO> disponibles = model.getReporterosDisponibles(fecha);
+			List<ReporteroDisplayDTO> disponibles = model.getReporterosDisponibles(fecha, nombreAgencia);
 			// Usamos los nombres exactos de tu DTO original: id_reportero
 			TableModel tmodel = SwingUtil.getTableModelFromPojos(disponibles, new String[]{"id_reportero", "nombre"});
 			view.getTabDisponibles().setModel(tmodel);

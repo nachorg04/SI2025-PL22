@@ -115,8 +115,7 @@ public class AppMainController {
 		app.view.AsignarReporterosView asigView = new app.view.AsignarReporterosView();
 
 		// 2. Instanciamos tu controlador inyectándole el modelo y la vista
-		app.controller.AsignacionReporterosController asigController = new app.controller.AsignacionReporterosController(asigModel, asigView);
-
+		app.controller.AsignacionReporterosController asigController = new app.controller.AsignacionReporterosController(asigModel, asigView, agenteSeleccionado);
 		// 3. Inicializamos tu controlador (activa tus botones)
 		asigController.initController();
 
