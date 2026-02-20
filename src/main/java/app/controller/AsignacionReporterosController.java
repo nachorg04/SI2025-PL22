@@ -48,6 +48,11 @@ public class AsignacionReporterosController {
 		TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[]{"id_evento", "descripcion", "fecha"});
 		view.getTabEventos().setModel(tmodel);
 		SwingUtil.autoAdjustColumns(view.getTabEventos());
+		
+		// Oculta visualmente la columna 0 (idEvento)
+        view.getTabEventos().getColumnModel().getColumn(0).setMinWidth(0);
+        view.getTabEventos().getColumnModel().getColumn(0).setMaxWidth(0);
+        view.getTabEventos().getColumnModel().getColumn(0).setWidth(0);
 	}
 
 	private void cargarReporterosDisponibles() {
@@ -63,6 +68,12 @@ public class AsignacionReporterosController {
 			TableModel tmodel = SwingUtil.getTableModelFromPojos(disponibles, new String[]{"id_reportero", "nombre"});
 			view.getTabDisponibles().setModel(tmodel);
 			SwingUtil.autoAdjustColumns(view.getTabDisponibles());
+			
+			
+			// Oculta visualmente la columna 0 (idReportero)
+            view.getTabDisponibles().getColumnModel().getColumn(0).setMinWidth(0);
+            view.getTabDisponibles().getColumnModel().getColumn(0).setMaxWidth(0);
+            view.getTabDisponibles().getColumnModel().getColumn(0).setWidth(0);
 		}
 	}
 
@@ -88,6 +99,12 @@ public class AsignacionReporterosController {
 		TableModel tmodel = SwingUtil.getTableModelFromPojos(reporterosAsignadosVisualmente, new String[]{"id_reportero", "nombre"});
 		view.getTabAsignados().setModel(tmodel);
 		SwingUtil.autoAdjustColumns(view.getTabAsignados());
+		
+		 //Oculta visualmente la columna 0 (idReportero)
+        view.getTabAsignados().getColumnModel().getColumn(0).setMinWidth(0);
+        view.getTabAsignados().getColumnModel().getColumn(0).setMaxWidth(0);
+        view.getTabAsignados().getColumnModel().getColumn(0).setWidth(0);
+		
 	}
 
 	private void confirmarAsignacion() {
