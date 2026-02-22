@@ -84,7 +84,7 @@ public class DarAccesoEmpresaView extends JFrame {
 		contentPane.add(btnDarAcceso);
 
 		// --- COLUMNA 3: EMPRESAS SELECCIONADAS ---
-		JLabel lblTituloSeleccionadas = new JLabel("Nuevos accesos a otorgar");
+		JLabel lblTituloSeleccionadas = new JLabel("Empresas seleccionadas");
 		lblTituloSeleccionadas.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		lblTituloSeleccionadas.setBounds(670, 64, 242, 14);
 		contentPane.add(lblTituloSeleccionadas);

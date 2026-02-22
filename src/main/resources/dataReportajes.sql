@@ -72,3 +72,22 @@ INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (6
 INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (6, 1, 'RECHAZADO', false);
 INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (7, 5, 'PENDIENTE', false);
 INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (8, 2, 'ACEPTADO', true);
+
+-- Para probar la "Agencia Central de Noticias" (Evento 1 ya tiene reportaje)
+INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (1, 3, 'ACEPTADO', false);
+INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (1, 4, 'ACEPTADO', false);
+INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (1, 5, 'ACEPTADO', false);
+
+-- Para probar "Prensa Global" (Los eventos 2 y 8 ya tienen reportaje)
+INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (2, 1, 'ACEPTADO', false);
+INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (2, 2, 'ACEPTADO', false);
+INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (8, 4, 'ACEPTADO', false);
+
+-- Para probar "Agencia EFE Norte" (El evento 6 ya tiene reportaje)
+INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (6, 2, 'ACEPTADO', false);
+INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (6, 3, 'ACEPTADO', false);
+
+-- Para probar "Asturias Media" (El evento 4 ya tiene reportaje)
+INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (4, 1, 'ACEPTADO', false);
+INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (4, 2, 'ACEPTADO', false);
+

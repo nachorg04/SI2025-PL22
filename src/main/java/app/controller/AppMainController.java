@@ -48,6 +48,7 @@ public class AppMainController {
 
 		// Agente
 		this.view.addAccionAgente1Listener(e -> ejecutarAccionAgente1());
+		this.view.addAccionAgente2Listener(e -> ejecutarAccionAgente2());
 
 		// Empresa
 		this.view.addAccionEmpresa1Listener(e -> ejecutarAccionEmpresa1());
@@ -122,6 +123,24 @@ public class AppMainController {
 		// 4. Hacemos visible tu ventana
 		asigView.getFrame().setVisible(true);
 	}
+
+	private void ejecutarAccionAgente2() {
+		// Mensaje de error si no se ha seleccionado ningún agente en el combobox
+		if (view.getComboAgente().getSelectedItem() == null) {
+			giis.demo.util.SwingUtil.showMessage("Debes seleccionar un agente", "ERROR", javax.swing.JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		// Obtenemos el nombre de la agencia seleccionada
+		String agenteSeleccionado = (String) view.getComboAgente().getSelectedItem();
+		System.out.println("Agente seleccionado para distribuir reportaje: " + agenteSeleccionado);
+
+		// Arrancamos el MVC de la historia 33528
+		app.model.DarAccesoEmpresaModel modeloAcceso = new app.model.DarAccesoEmpresaModel();
+		app.view.DarAccesoEmpresaView vistaAcceso = new app.view.DarAccesoEmpresaView();
+		new app.controller.DarAccesoEmpresaController(modeloAcceso, vistaAcceso, agenteSeleccionado);
+	}
+
 
 	// --- Lógica de la Empresa ---
 	private void ejecutarAccionEmpresa1() {
