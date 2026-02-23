@@ -48,6 +48,7 @@ public class AppMainController {
 
 		// Agente
 		this.view.addAccionAgente1Listener(e -> ejecutarAccionAgente1());
+		this.view.addAccionAgente2Listener(e -> ejecutarAccionAgente2());
 
 		// Empresa
 		this.view.addAccionEmpresa1Listener(e -> ejecutarAccionEmpresa1());
@@ -176,4 +177,19 @@ public class AppMainController {
 			System.out.println("Aviso: Base de datos no inicializada. Los combos aparecerán vacíos.");
 		}
 	}
+	
+	private void ejecutarAccionAgente2() {
+        //Mensaje de error si no se ha seleccionado ninguna agencia en el combobox
+        if (view.getComboAgente().getSelectedItem() == null) {
+            SwingUtil.showMessage("Debes seleccionar una agencia", "ERROR", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        String agenciaSeleccionada = (String) view.getComboAgente().getSelectedItem();
+        
+        // Instanciamos el MVC del informe del evento
+        app.model.informeEventoModel model = new app.model.informeEventoModel();
+        app.view.informeEventoView vista = new app.view.informeEventoView();
+        
+        new app.controller.informeEventoController(model, vista, agenciaSeleccionada);
+    }
 }
