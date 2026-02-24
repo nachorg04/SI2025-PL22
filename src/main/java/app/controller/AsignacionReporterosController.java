@@ -27,7 +27,7 @@ public class AsignacionReporterosController {
         this.reporterosAsignadosVisualmente = new ArrayList<>();
         this.reporterosDisponiblesVisualmente = new ArrayList<>();
         this.initView();
-        this.initController();
+       // this.initController();
     }
 
     public void initController() {
@@ -137,14 +137,14 @@ public class AsignacionReporterosController {
     private void confirmarAsignacion() {
         int filaEvento = view.getTabEventos().getSelectedRow();
 
-        if (filaEvento >= 0) {
+        if (filaEvento >= 0) { // Quitamos el !isEmpty() para permitir guardar vacíos
             Integer idEvento = (Integer) view.getTabEventos().getValueAt(filaEvento, 0);
 
             // 1. LIMPIEZA TOTAL: Borramos de la BD todas las asignaciones de este evento
             model.eliminarAsignacionesPorEvento(idEvento);
 
-            // 2. INSERCIÓN: Guardamos lo que haya quedado en la tabla derecha
-            for (ReporteroDisplayDTO rep : reporterosAsignadosVisualmente) {
+            // 2. INSERCIÓN NUEVA: Guardamos lo que haya quedado en la tabla derecha
+            for (app.dto.ReporteroDisplayDTO rep : reporterosAsignadosVisualmente) {
                 model.guardarAsignacion(idEvento, rep.getIdReportero());
             }
 
