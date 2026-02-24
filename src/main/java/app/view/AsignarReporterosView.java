@@ -1,7 +1,6 @@
 package app.view;
 
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -9,9 +8,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 import java.awt.Font;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class AsignarReporterosView extends JFrame {
 
@@ -21,14 +20,12 @@ public class AsignarReporterosView extends JFrame {
 	private JTable tabDisponibles;
 	private JTable tabAsignados;
 	private JButton btnAsignar;
+	private JButton btnEliminar; // NUEVO BOTÓN
 	private JButton btnCancelar;
 	private JButton btnAceptar;
-	
 	private JLabel lblNombreAgencia;
+	private JComboBox<String> cbFiltroEventos; // NUEVO FILTRO
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -42,97 +39,93 @@ public class AsignarReporterosView extends JFrame {
 		});
 	}
 
-	/**
-	 * Create the frame.
-	 */
 	public AsignarReporterosView() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 900, 600);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Mejor DISPOSE para no cerrar toda la app
+		setBounds(100, 100, 960, 600);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 89, 362, 257);
-		contentPane.add(scrollPane);
+		lblNombreAgencia = new JLabel("Agencia de Prensa : Mi Agencia");
+		lblNombreAgencia.setFont(new Font("Tahoma", Font.BOLD, 18));
+		lblNombreAgencia.setBounds(10, 9, 450, 22);
+		contentPane.add(lblNombreAgencia);
 
+		// --- NUEVO: FILTRO DE EVENTOS ---
+		JLabel lblFiltro = new JLabel("Filtro de visualización:");
+		lblFiltro.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblFiltro.setBounds(10, 45, 140, 20);
+		contentPane.add(lblFiltro);
+
+		cbFiltroEventos = new JComboBox<String>();
+		cbFiltroEventos.setModel(new DefaultComboBoxModel(new String[] {"Eventos sin reporteros asignados", "Eventos con reporteros asignados"}));
+		cbFiltroEventos.setBounds(160, 45, 230, 22);
+		contentPane.add(cbFiltroEventos);
+
+		// --- TABLA EVENTOS ---
+		JLabel lblNewLabel_1 = new JLabel("Eventos");
+		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblNewLabel_1.setBounds(10, 80, 81, 14);
+		contentPane.add(lblNewLabel_1);
+
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(10, 105, 380, 246);
+		contentPane.add(scrollPane);
 		tabEventos = new JTable();
 		scrollPane.setViewportView(tabEventos);
 
-		lblNombreAgencia = new JLabel("Agencia de Prensa : Mi Agencia");
-		lblNombreAgencia.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		lblNombreAgencia.setBounds(10, 9, 633, 32);
-		contentPane.add(lblNombreAgencia);
-
-		JLabel lblNewLabel_1 = new JLabel("Eventos");
-		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblNewLabel_1.setBounds(10, 64, 81, 14);
-		contentPane.add(lblNewLabel_1);
-
+		// --- TABLA DISPONIBLES ---
 		JLabel lblNewLabel_2 = new JLabel("Reporteros Disponibles");
 		lblNewLabel_2.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblNewLabel_2.setBounds(382, 64, 208, 14);
+		lblNewLabel_2.setBounds(410, 80, 208, 14);
 		contentPane.add(lblNewLabel_2);
 
 		JScrollPane scrollPane_1 = new JScrollPane();
-		scrollPane_1.setBounds(382, 89, 244, 257);
+		scrollPane_1.setBounds(410, 105, 244, 246);
 		contentPane.add(scrollPane_1);
-
 		tabDisponibles = new JTable();
 		scrollPane_1.setViewportView(tabDisponibles);
 
 		btnAsignar = new JButton("Asignar");
-		btnAsignar.setBounds(382, 357, 244, 23);
+		btnAsignar.setBounds(410, 365, 244, 23);
 		contentPane.add(btnAsignar);
 
+		// --- TABLA ASIGNADOS ---
 		JLabel lblNewLabel_3 = new JLabel("Reporteros Asignados");
 		lblNewLabel_3.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblNewLabel_3.setBounds(632, 64, 242, 14);
+		lblNewLabel_3.setBounds(670, 80, 242, 14);
 		contentPane.add(lblNewLabel_3);
 
 		JScrollPane scrollPane_2 = new JScrollPane();
-		scrollPane_2.setBounds(636, 89, 238, 257);
+		scrollPane_2.setBounds(670, 105, 238, 246);
 		contentPane.add(scrollPane_2);
-
 		tabAsignados = new JTable();
 		scrollPane_2.setViewportView(tabAsignados);
 
+		// --- NUEVO: BOTÓN ELIMINAR ---
+		btnEliminar = new JButton("Eliminar Asignación");
+		btnEliminar.setBounds(670, 365, 238, 23);
+		contentPane.add(btnEliminar);
+
+		// --- BOTONES INFERIORES ---
 		btnCancelar = new JButton("Cancelar");
-		btnCancelar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		btnCancelar.setBounds(763, 527, 111, 23);
+		btnCancelar.setBounds(797, 527, 111, 23);
 		contentPane.add(btnCancelar);
 
 		btnAceptar = new JButton("Aceptar");
-		btnAceptar.setBounds(636, 527, 117, 23);
+		btnAceptar.setBounds(670, 527, 117, 23);
 		contentPane.add(btnAceptar);
+	}
 
-	}
-	public JTable getTabEventos() {
-		return tabEventos;
-	}
-	public JTable getTabDisponibles() {
-		return tabDisponibles;
-	}
-	public JTable getTabAsignados() {
-		return tabAsignados;
-	}
-	public JButton getBtnAsignar() {
-		return btnAsignar;
-	}
-	public JButton getBtnCancelar() {
-		return btnCancelar;
-	}
-	public JButton getBtnAceptar() {
-		return btnAceptar;
-	}
-	public javax.swing.JFrame getFrame() {
-		return this; 
-	}
-	  public javax.swing.JLabel getLblTituloAgencia() { 
-	        return this.lblNombreAgencia; 
-	    }
+	public JTable getTabEventos() { return tabEventos; }
+	public JTable getTabDisponibles() { return tabDisponibles; }
+	public JTable getTabAsignados() { return tabAsignados; }
+	public JButton getBtnAsignar() { return btnAsignar; }
+	public JButton getBtnEliminar() { return btnEliminar; }
+	public JButton getBtnCancelar() { return btnCancelar; }
+	public JButton getBtnAceptar() { return btnAceptar; }
+	public JComboBox<String> getCbFiltroEventos() { return cbFiltroEventos; }
+	public JFrame getFrame() { return this; }
+	public JLabel getLblTituloAgencia() { return this.lblNombreAgencia; }
 }
