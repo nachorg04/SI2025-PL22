@@ -1,10 +1,10 @@
 package app.controller;
 
-import java.util.List;
+
 
 import javax.swing.JOptionPane;
 
-import app.dto.AppMainDTO;
+
 import app.model.AppMainModel;
 import app.view.AppMainView;
 import giis.demo.util.Database; // Asumo que esta es la ruta de tu BD según mensajes anteriores
@@ -49,9 +49,11 @@ public class AppMainController {
 		// Agente
 		this.view.addAccionAgente1Listener(e -> ejecutarAccionAgente1());
 		this.view.addAccionAgente2Listener(e -> ejecutarAccionAgente2());
+		this.view.addAccionInformeEventosListener(e -> accionInformeEventos());
 
 		// Empresa
 		this.view.addAccionEmpresa1Listener(e -> ejecutarAccionEmpresa1());
+		this.view.addOfrecerReportajesListener(e -> ejecutarOfrecerReportajes()); // 
 	}
 
 	public void initView() {
@@ -124,6 +126,24 @@ public class AppMainController {
 		asigView.getFrame().setVisible(true);
 	}
 
+	private void ejecutarAccionAgente2() {
+		// Mensaje de error si no se ha seleccionado ningún agente en el combobox
+		if (view.getComboAgente().getSelectedItem() == null) {
+			giis.demo.util.SwingUtil.showMessage("Debes seleccionar un agente", "ERROR", javax.swing.JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		// Obtenemos el nombre de la agencia seleccionada
+		String agenteSeleccionado = (String) view.getComboAgente().getSelectedItem();
+		System.out.println("Agente seleccionado para distribuir reportaje: " + agenteSeleccionado);
+
+		// Arrancamos el MVC de la historia 33528
+		app.model.DarAccesoEmpresaModel modeloAcceso = new app.model.DarAccesoEmpresaModel();
+		app.view.DarAccesoEmpresaView vistaAcceso = new app.view.DarAccesoEmpresaView();
+		new app.controller.DarAccesoEmpresaController(modeloAcceso, vistaAcceso, agenteSeleccionado);
+	}
+
+
 	// --- Lógica de la Empresa ---
 	private void ejecutarAccionEmpresa1() {
 		if (view.getComboEmpresa().getSelectedItem() == null) {
@@ -140,6 +160,26 @@ public class AppMainController {
 		new app.controller.gestionarOfrecimientosReportajesController(ofreModel, ofreView, empresaSeleccionada);
 	}
 
+	private void ejecutarOfrecerReportajes() {
+	    // Validamos que haya una empresa seleccionada en el combo
+	    if (view.getComboEmpresa().getSelectedItem() == null) {
+	        SwingUtil.showMessage("Debes seleccionar una empresa", "ERROR", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
+	    
+	    String empresaSeleccionada = (String) view.getComboEmpresa().getSelectedItem();
+	    System.out.println("Empresa seleccionada para ofrecer reportajes: " + empresaSeleccionada);
+
+	    // 1. Instanciamos TU modelo y TU vista
+	    app.model.OfrecerReportajesModel miModelo = new app.model.OfrecerReportajesModel();
+	    app.view.OfrecerReportajesView miVista = new app.view.OfrecerReportajesView();
+
+	    // 2. Instanciamos TU controlador (él se encarga de mostrar la ventana)
+	    // Le pasamos el nombre de la empresa por si necesitas filtrar por ella
+	    new app.controller.OfrecerReportajesController(miModelo, miVista);
+	}
+	
+	
 	/**
 	 * Limpia y vuelve a cargar los datos de los ComboBoxes desde la base de datos.
 	 */
@@ -178,7 +218,7 @@ public class AppMainController {
 		}
 	}
 	
-	private void ejecutarAccionAgente2() {
+	private void accionInformeEventos() {
         //Mensaje de error si no se ha seleccionado ninguna agencia en el combobox
         if (view.getComboAgente().getSelectedItem() == null) {
             SwingUtil.showMessage("Debes seleccionar una agencia", "ERROR", JOptionPane.ERROR_MESSAGE);
