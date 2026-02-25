@@ -189,6 +189,9 @@ public class AppMainView {
 		btnAccionInformeEventos = new JButton("Informe de eventos");
 		panelBotonesAgente.add(btnAccionInformeEventos);
 
+		btnOfrecerReportajes = new JButton("Ofrecer reportajes");
+		panelBotonesAgente.add(btnOfrecerReportajes);
+		
 		// Columna 3: Botones de Empresa de Comunicación
 		JPanel panelBotonesEmpresa = new JPanel(new GridLayout(0, 1, 0, 10));
 		GridBagConstraints gbc_panelBotonesEmpresa = new GridBagConstraints();
@@ -202,8 +205,7 @@ public class AppMainView {
 		btnAccionEmpresa1 = new JButton("Gestionar ofrecimientos de reportajes");
 		panelBotonesEmpresa.add(btnAccionEmpresa1);
 		
-		btnOfrecerReportajes = new JButton("Ofrecer reportajes");
-		panelBotonesEmpresa.add(btnOfrecerReportajes);
+
 
 
 		// PANEL INFERIOR (Botones Base de Datos)
