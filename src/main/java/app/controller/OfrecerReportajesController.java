@@ -15,15 +15,20 @@ public class OfrecerReportajesController {
 	private OfrecerReportajesView view;
 	private DefaultListModel<String> modeloListaOfertas = new DefaultListModel<>();
 	
+	private String nombreAgencia;
+	private String agenciaActual;
+	
 	// Lista para rastrear qué empresas hemos ofertado en esta sesión
 	private List<Integer> empresasOfertadasSesion = new ArrayList<>();
 
-	public OfrecerReportajesController(OfrecerReportajesModel model, OfrecerReportajesView view) {
-		this.model = model;
-		this.view = view;
-		this.initView();
+	public OfrecerReportajesController(OfrecerReportajesModel m, OfrecerReportajesView v, String agencia) {
+	    this.model = m;
+	    this.view = v;
+	    this.agenciaActual = agencia;
+	    this.view.lblAgenciaSeleccionada.setText("Agencia: " + agencia); // Punto 2 cumplido
+	    this.initView();
 	}
-
+	
 	public void initView() {
 		cargarEventos();
 		view.listOfertasEnCurso.setModel(modeloListaOfertas);
@@ -112,13 +117,13 @@ public class OfrecerReportajesController {
 	}
 
 	// ... (Resto de métodos cargarEventos, cargarEmpresas y gestionarChecks se mantienen igual) ...
-    private void cargarEventos() {
-		List<OfrecerReportajesDTO> eventos = model.getEventosConReportero();
-		String[] columnas = {"id_evento", "nombre_evento", "reportero_asignado"};
-		view.tableEventos.setModel(SwingUtil.getTableModelFromPojos(eventos, columnas));
-		SwingUtil.autoAdjustColumns(view.tableEventos);
+	private void cargarEventos() {
+	    List<OfrecerReportajesDTO> eventos = model.getEventosConReportero(agenciaActual);
+	    String[] columnas = {"id_evento", "nombre_evento", "reportero_asignado"};
+	    view.tableEventos.setModel(SwingUtil.getTableModelFromPojos(eventos, columnas));
+	    SwingUtil.autoAdjustColumns(view.tableEventos);
 	}
-
+	
 	private void cargarEmpresas(int idEvento) {
 		List<OfrecerReportajesDTO> empresas = model.getEmpresasSinOferta(idEvento);
 		String[] columnas = {"id_empresa", "nombre_empresa"};

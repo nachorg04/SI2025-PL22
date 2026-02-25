@@ -161,22 +161,23 @@ public class AppMainController {
 	}
 
 	private void ejecutarOfrecerReportajes() {
-	    // Validamos que haya una empresa seleccionada en el combo
-	    if (view.getComboEmpresa().getSelectedItem() == null) {
-	        SwingUtil.showMessage("Debes seleccionar una empresa", "ERROR", JOptionPane.ERROR_MESSAGE);
+	    // 1. Validamos que haya una AGENCIA seleccionada (combo central), no la empresa
+	    if (view.getComboAgente().getSelectedItem() == null) {
+	        SwingUtil.showMessage("Debes seleccionar una agencia de prensa", "ERROR", javax.swing.JOptionPane.ERROR_MESSAGE);
 	        return;
 	    }
 	    
-	    String empresaSeleccionada = (String) view.getComboEmpresa().getSelectedItem();
-	    System.out.println("Empresa seleccionada para ofrecer reportajes: " + empresaSeleccionada);
+	    // 2. Capturamos el nombre de la agencia seleccionada
+	    String agenciaSeleccionada = (String) view.getComboAgente().getSelectedItem();
+	    System.out.println("Agencia seleccionada para ofrecer reportajes: " + agenciaSeleccionada);
 
-	    // 1. Instanciamos TU modelo y TU vista
+	    // 3. Instanciamos tu modelo y vista
 	    app.model.OfrecerReportajesModel miModelo = new app.model.OfrecerReportajesModel();
 	    app.view.OfrecerReportajesView miVista = new app.view.OfrecerReportajesView();
 
-	    // 2. Instanciamos TU controlador (él se encarga de mostrar la ventana)
-	    // Le pasamos el nombre de la empresa por si necesitas filtrar por ella
-	    new app.controller.OfrecerReportajesController(miModelo, miVista);
+	    // 4. Instanciamos tu controlador pasándole el nombre de la AGENCIA
+	    // Importante: Ahora le pasamos 3 parámetros para cumplir con el filtrado solicitado
+	    new app.controller.OfrecerReportajesController(miModelo, miVista, agenciaSeleccionada);
 	}
 	
 	
@@ -232,4 +233,6 @@ public class AppMainController {
         
         new app.controller.informeEventoController(model, vista, agenciaSeleccionada);
     }
+	
+	
 }

@@ -8,6 +8,8 @@ import javax.swing.JList;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
+import java.awt.Font;
+import java.awt.Color;
 
 public class OfrecerReportajesView extends JFrame {
 
@@ -22,35 +24,45 @@ public class OfrecerReportajesView extends JFrame {
 	public JButton btnCancelarEmpresas;
 	public JButton btnAceptarTodo;
 	public JButton btnCancelarTodo;
+	
+	// Punto 2: Etiqueta para mostrar el nombre de la agencia seleccionada
+	public JLabel lblAgenciaSeleccionada;
 
 	/**
 	 * Create the frame.
 	 */
 	public OfrecerReportajesView() {
 		setTitle("Gestión de Ofrecimientos de Reportajes");
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Mejor DISPOSE que EXIT para no cerrar toda la app
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
 		setBounds(100, 100, 1110, 568);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		// Etiquetas
+		// Punto 2: Configuración de la etiqueta de la Agencia
+		lblAgenciaSeleccionada = new JLabel("Agencia: Seleccione una agencia");
+		lblAgenciaSeleccionada.setForeground(Color.BLACK);
+		lblAgenciaSeleccionada.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblAgenciaSeleccionada.setBounds(10, 5, 600, 24);
+		contentPane.add(lblAgenciaSeleccionada);
+		
+		// Etiquetas de las columnas (ajustadas en Y para dejar espacio al título)
 		JLabel lblEventos = new JLabel("Eventos con reporteros asignados");
-		lblEventos.setBounds(10, 22, 240, 24);
+		lblEventos.setBounds(10, 32, 240, 24);
 		contentPane.add(lblEventos);
 		
 		JLabel lblEmpresas = new JLabel("Empresas comunicación (Sin ofertas)");
-		lblEmpresas.setBounds(391, 27, 249, 14);
+		lblEmpresas.setBounds(391, 37, 249, 14);
 		contentPane.add(lblEmpresas);
 		
 		JLabel lblOfertas = new JLabel("Ofertas en curso");
-		lblOfertas.setBounds(761, 27, 155, 14);
+		lblOfertas.setBounds(761, 37, 155, 14);
 		contentPane.add(lblOfertas);
 		
 		// Columna 1: Eventos
 		JScrollPane scrollPaneEventos = new JScrollPane();
-		scrollPaneEventos.setBounds(10, 52, 313, 407);
+		scrollPaneEventos.setBounds(10, 62, 313, 397);
 		contentPane.add(scrollPaneEventos);
 		
 		tableEventos = new JTable();
@@ -58,7 +70,7 @@ public class OfrecerReportajesView extends JFrame {
 		
 		// Columna 2: Empresas
 		JScrollPane scrollPaneEmpresas = new JScrollPane();
-		scrollPaneEmpresas.setBounds(391, 52, 313, 407);
+		scrollPaneEmpresas.setBounds(391, 62, 313, 397);
 		contentPane.add(scrollPaneEmpresas);
 		
 		tableEmpresas = new JTable();
@@ -66,7 +78,7 @@ public class OfrecerReportajesView extends JFrame {
 		
 		// Columna 3: Lista Derecha
 		JScrollPane scrollPaneOfertas = new JScrollPane();
-		scrollPaneOfertas.setBounds(761, 52, 313, 407);
+		scrollPaneOfertas.setBounds(761, 62, 313, 397);
 		contentPane.add(scrollPaneOfertas);
 		
 		listOfertasEnCurso = new JList<String>();

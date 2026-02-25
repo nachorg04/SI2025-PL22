@@ -9,22 +9,25 @@ public class OfrecerReportajesModel {
     private Database db = new Database();
 
     /**
-     * Consulta 1: Obtiene eventos con su reportero asignado.
-     * Hacemos JOIN con Asignacion y Reportero para sacar los nombres reales.
+     * Obtiene los eventos que tienen reportero asignado, 
+     * filtrados por la AGENCIA seleccionada en el menú principal.
      */
-    public List<OfrecerReportajesDTO> getEventosConReportero() {
+    public List<OfrecerReportajesDTO> getEventosConReportero(String nombreAgencia) {
+        // SQL con JOIN para filtrar por el nombre de la agencia
         String sql = "SELECT e.id_evento, e.descripcion AS nombre_evento, r.nombre AS reportero_asignado " +
                      "FROM Evento e " +
                      "JOIN Asignacion a ON e.id_evento = a.id_evento " +
-                     "JOIN Reportero r ON a.id_reportero = r.id_reportero";
-        return db.executeQueryPojo(OfrecerReportajesDTO.class, sql);
+                     "JOIN Reportero r ON a.id_reportero = r.id_reportero " +
+                     "JOIN Agencia ag ON e.id_agencia = ag.id_agencia " + 
+                     "WHERE ag.nombre = ?"; 
+        
+        return db.executeQueryPojo(OfrecerReportajesDTO.class, sql, nombreAgencia);
     }
 
     /**
-     * Consulta 2: Obtiene empresas que NO tienen aún una oferta para ese evento.
+     * Obtiene las empresas que aún no han recibido una oferta para un evento concreto.
      */
     public List<OfrecerReportajesDTO> getEmpresasSinOferta(int idEvento) {
-        // En tu DB la columna es 'nombre', usamos 'AS nombre_empresa' para el DTO
         String sql = "SELECT id_empresa, nombre AS nombre_empresa " + 
                      "FROM Empresa_Comunicacion " +
                      "WHERE id_empresa NOT IN (" +
@@ -34,15 +37,18 @@ public class OfrecerReportajesModel {
     }
 
     /**
-     * Consulta 3: Insertar el ofrecimiento.
+     * Inserta un nuevo ofrecimiento en la tabla Ofrecimiento.
      */
     public void insertarOfrecimientos(int idEvento, int idEmpresa) {
-        String sql = "INSERT INTO Ofrecimiento (id_evento, id_empresa, estado) VALUES (?, ?, 'PENDIENTE')";
+        String sql = "INSERT INTO Ofrecimiento (id_evento, id_empresa, estado, tiene_acceso) VALUES (?, ?, 'PENDIENTE', 0)";
         db.executeUpdate(sql, idEvento, idEmpresa);
     }
-    
+
+    /**
+     * Elimina un ofrecimiento (Lógica para el botón Cancelar Todo).
+     */
     public void eliminarOfrecimiento(int idEvento, int idEmpresa) {
         String sql = "DELETE FROM Ofrecimiento WHERE id_evento = ? AND id_empresa = ?";
-        db.executeUpdate(sql, idEvento, idEmpresa); 
+        db.executeUpdate(sql, idEvento, idEmpresa);
     }
 }
