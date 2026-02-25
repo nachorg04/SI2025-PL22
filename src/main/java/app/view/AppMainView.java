@@ -38,6 +38,7 @@ public class AppMainView {
 	private JButton btnAccionEmpresa1;
 	private JButton btnOfrecerReportajes; // Historia 33526
 	private JButton btnAccionInformeEventos;
+	private JButton btnAccederReportajes; // Historia 33529
 	
 	// Botones de Base de Datos
 	private JButton btnCrearBD;
@@ -206,6 +207,8 @@ public class AppMainView {
 		panelBotonesEmpresa.add(btnAccionEmpresa1);
 		
 
+		btnAccederReportajes = new JButton("Visualizar reportajes autorizados");
+		panelBotonesEmpresa.add(btnAccederReportajes);
 
 
 		// PANEL INFERIOR (Botones Base de Datos)
@@ -254,6 +257,9 @@ public class AppMainView {
 	
 	public void addAccionInformeEventosListener(ActionListener listener) {
 	    btnAccionInformeEventos.addActionListener(listener);
+	}
+	public void addAccederReportajesListener(ActionListener listener) {
+	    btnAccederReportajes.addActionListener(listener);
 	}
 
 	public JFrame getFrame() {

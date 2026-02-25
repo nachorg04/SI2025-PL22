@@ -4,8 +4,9 @@ package app.controller;
 
 import javax.swing.JOptionPane;
 
-
+import app.model.AccederReportajeModel;
 import app.model.AppMainModel;
+import app.view.AccederReportajeView;
 import app.view.AppMainView;
 import giis.demo.util.Database; // Asumo que esta es la ruta de tu BD según mensajes anteriores
 import giis.demo.util.SwingUtil;
@@ -54,6 +55,7 @@ public class AppMainController {
 		// Empresa
 		this.view.addAccionEmpresa1Listener(e -> ejecutarAccionEmpresa1());
 		this.view.addOfrecerReportajesListener(e -> ejecutarOfrecerReportajes()); // 
+		view.addAccederReportajesListener(e -> ejecutarAccederReportajes());
 	}
 
 	public void initView() {
@@ -180,6 +182,13 @@ public class AppMainController {
 	    new app.controller.OfrecerReportajesController(miModelo, miVista, agenciaSeleccionada);
 	}
 	
+	// El método que lanza la ventana
+	private void ejecutarAccederReportajes() {
+	    String empresa = (String) view.getComboEmpresa().getSelectedItem();
+	    if (empresa != null) {
+	        new AccederReportajeController(new AccederReportajeModel(), new AccederReportajeView(), empresa);
+	    }
+	}
 	
 	/**
 	 * Limpia y vuelve a cargar los datos de los ComboBoxes desde la base de datos.
