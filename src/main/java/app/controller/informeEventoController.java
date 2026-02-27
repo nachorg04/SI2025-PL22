@@ -96,19 +96,37 @@ public class informeEventoController {
             java.io.File fileToSave = fileChooser.getSelectedFile();
             
             try (FileWriter writer = new FileWriter(fileToSave)) {
-                writer.write("INFORME DEL EVENTO: " + descEventoActual + "\n\n");
-                writer.write("Reportaje entregado:," + infoEntregado + "\n");
-                writer.write("Entregado por:," + (infoAutor != null ? infoAutor : "") + "\n\n");
                 
-                writer.write("REPORTEROS ASIGNADOS\n");
-                if (reporterosActuales.isEmpty()) writer.write("Ninguno\n");
-                for (AppMainDTO r : reporterosActuales) writer.write(r.getNombre() + "\n");
-                
-                writer.write("\nEMPRESAS CON ACCESO\n");
-                if (empresasActuales.isEmpty()) writer.write("Ninguna\n");
-                for (AppMainDTO e : empresasActuales) writer.write(e.getNombre() + "\n");
+                // 1. ESCRIBIR LAS CABECERAS (La primera fila)
+            	writer.write("Evento;Reportaje Entregado;Entregado Por;Reporteros Asignados;Empresas Con Acceso\n");                
+                // 2. PREPARAR LOS DATOS DE LAS LISTAS (Juntamos los nombres con punto y coma)
+                String reporterosStr = "Ninguno";
+                if (!reporterosActuales.isEmpty()) {
+                    java.util.List<String> nombresRep = new java.util.ArrayList<>();
+                    for (AppMainDTO r : reporterosActuales) nombresRep.add(r.getNombre());
+                    reporterosStr = String.join(", ", nombresRep); // Quedaría: "Ana; Juan; Pedro"
+                }
 
-                SwingUtil.showMessage("Informe guardado en:\n" + fileToSave.getAbsolutePath(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                String empresasStr = "Ninguna";
+                if (!empresasActuales.isEmpty()) {
+                    java.util.List<String> nombresEmp = new java.util.ArrayList<>();
+                    for (AppMainDTO e : empresasActuales) nombresEmp.add(e.getNombre());
+                    empresasStr = String.join(", ", nombresEmp);
+                }
+
+                // 3. ESCRIBIR LA FILA DE DATOS
+                // Envolvemos todo entre comillas dobles ("") para que si un nombre lleva una coma, Excel no se vuelva loco
+                String lineaDatos = String.format("\"%s\";\"%s\";\"%s\";\"%s\";\"%s\"\n",
+                    descEventoActual,
+                    infoEntregado,
+                    (infoAutor != null ? infoAutor : "(Nadie)"),
+                    reporterosStr,
+                    empresasStr
+                );
+                
+                writer.write(lineaDatos);
+
+                SwingUtil.showMessage("Informe exportado en CSV tabular en:\n" + fileToSave.getAbsolutePath(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
             } catch (IOException ex) {
                 SwingUtil.showMessage("Error al guardar el archivo CSV.", "Error", JOptionPane.ERROR_MESSAGE);
