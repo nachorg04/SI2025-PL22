@@ -53,9 +53,12 @@ public class AppMainController {
 		this.view.addAccionInformeEventosListener(e -> accionInformeEventos());
 
 		// Empresa
-		this.view.addAccionEmpresa1Listener(e -> ejecutarAccionEmpresa1());
-		this.view.addOfrecerReportajesListener(e -> ejecutarOfrecerReportajes()); // 
-		view.addAccederReportajesListener(e -> ejecutarAccederReportajes());
+        this.view.addAccionEmpresa1Listener(e -> ejecutarAccionEmpresa1());
+        this.view.addOfrecerReportajesListener(e -> ejecutarOfrecerReportajes()); 
+        view.addAccederReportajesListener(e -> ejecutarAccederReportajes());
+        
+        // NUEVO: Conectamos el clic del botón con su método
+        view.addInformeReportajesListener(e -> ejecutarInformeReportajes());
 	}
 
 	public void initView() {
@@ -238,6 +241,22 @@ public class AppMainController {
         
         new app.controller.informeEventoController(model, vista, agenciaSeleccionada);
     }
-	
+	// NUEVO MÉTODO: Arranca el MVC del Informe de Reportajes
+    private void ejecutarInformeReportajes() {
+        // 1. Validamos que haya una EMPRESA seleccionada
+        if (view.getComboEmpresa().getSelectedItem() == null) {
+            SwingUtil.showMessage("Debes seleccionar una empresa de comunicación", "ERROR", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // 2. Capturamos el nombre de la empresa seleccionada
+        String empresaSeleccionada = (String) view.getComboEmpresa().getSelectedItem();
+        
+        // 3. Instanciamos el MVC del informe pasándole el nombre de la empresa
+        app.model.informeReportajesModel modelo = new app.model.informeReportajesModel();
+        app.view.informeReportajesView vista = new app.view.informeReportajesView();
+        
+        new app.controller.informeReportajesController(modelo, vista, empresaSeleccionada);
+    }
 	
 }

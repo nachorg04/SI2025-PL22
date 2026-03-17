@@ -17,6 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import app.controller.AppMainController;
+import app.controller.informeReportajesController;
+import app.model.informeReportajesModel;
 
 public class AppMainView {
 
@@ -39,6 +41,7 @@ public class AppMainView {
 	private JButton btnOfrecerReportajes; // Historia 33526
 	private JButton btnAccionInformeEventos;
 	private JButton btnAccederReportajes; // Historia 33529
+    private JButton btnInformeReportajes; // NUEVO BOTÓN: Historia 34083
 	
 	// Botones de Base de Datos
 	private JButton btnCrearBD;
@@ -93,8 +96,6 @@ public class AppMainView {
 		contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
 		frame.setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
-
-
 
 		// PANEL CENTRAL (GridBagLayout para la cuadrícula principal)
 		JPanel panelCentral = new JPanel();
@@ -192,6 +193,7 @@ public class AppMainView {
 
 		btnOfrecerReportajes = new JButton("Ofrecer reportajes");
 		panelBotonesAgente.add(btnOfrecerReportajes);
+
 		
 		// Columna 3: Botones de Empresa de Comunicación
 		JPanel panelBotonesEmpresa = new JPanel(new GridLayout(0, 1, 0, 10));
@@ -209,6 +211,10 @@ public class AppMainView {
 
 		btnAccederReportajes = new JButton("Visualizar reportajes autorizados");
 		panelBotonesEmpresa.add(btnAccederReportajes);
+
+        // NUEVO: Añadimos el botón del informe a la interfaz
+        btnInformeReportajes = new JButton("Informe de reportajes adquiridos");
+        panelBotonesEmpresa.add(btnInformeReportajes);
 
 
 		// PANEL INFERIOR (Botones Base de Datos)
@@ -259,8 +265,13 @@ public class AppMainView {
 	    btnAccionInformeEventos.addActionListener(listener);
 	}
 	public void addAccederReportajesListener(ActionListener listener) {
-	    btnAccederReportajes.addActionListener(listener);
-	}
+        btnAccederReportajes.addActionListener(listener);
+    }
+    
+    // NUEVO: Listener para el botón del informe
+    public void addInformeReportajesListener(ActionListener listener) {
+        btnInformeReportajes.addActionListener(listener);
+    }
 
 	public JFrame getFrame() {
 		return frame;
