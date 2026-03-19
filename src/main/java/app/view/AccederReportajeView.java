@@ -1,102 +1,194 @@
 package app.view;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JTable;
-import javax.swing.JScrollPane;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JTextArea;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 
 public class AccederReportajeView extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+
 	private JPanel contentPane;
-	
-	// Componentes públicos para que el controlador los gestione
+
+	// Componentes publicos para que el controlador los gestione
 	public JTable tableEventos;
 	public JTextField txtTitulo;
 	public JTextField txtSubtitulo;
 	public JTextArea txtCuerpo;
 	public JLabel lblFechaVersion;
 	public JLabel lblHoraVersion;
-	public JLabel lblNombreEmpresa; 
+	public JLabel lblNombreEmpresa;
+	public JLabel lblPreviewFotos;
+	public JLabel lblPreviewVideos;
+	public JButton btnDescargarJson;
 
 	public AccederReportajeView() {
-		setTitle("Visualización de Reportajes Autorizados");
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
-		setBounds(100, 100, 900, 600);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		contentPane.setLayout(null);
+		setTitle("Visualizacion de Reportajes Autorizados");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setBounds(100, 100, 1180, 720);
+		setMinimumSize(new Dimension(1080, 680));
 
-		// --- PARTE SUPERIOR: NOMBRE DE LA EMPRESA (CONTEXTO) ---
+		contentPane = new JPanel(new BorderLayout(10, 10));
+		contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
+		setContentPane(contentPane);
+
+		JPanel panelCabecera = new JPanel(new BorderLayout());
 		lblNombreEmpresa = new JLabel("EMPRESA: ");
 		lblNombreEmpresa.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblNombreEmpresa.setBounds(20, 10, 800, 25);
-		contentPane.add(lblNombreEmpresa);
+		panelCabecera.add(lblNombreEmpresa, BorderLayout.WEST);
+		contentPane.add(panelCabecera, BorderLayout.NORTH);
 
-		// --- PANEL IZQUIERDO: REPORTAJES AUTORIZADOS ---
+		JSplitPane splitPrincipal = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitPrincipal.setResizeWeight(0.28);
+		splitPrincipal.setDividerLocation(320);
+		contentPane.add(splitPrincipal, BorderLayout.CENTER);
+
+		splitPrincipal.setLeftComponent(crearPanelEventos());
+		splitPrincipal.setRightComponent(crearPanelDetalle());
+	}
+
+	private JPanel crearPanelEventos() {
+		JPanel panelEventos = new JPanel(new BorderLayout(0, 8));
+
 		JLabel lblLista = new JLabel("REPORTAJES AUTORIZADOS");
 		lblLista.setFont(new Font("Tahoma", Font.BOLD, 11));
-		lblLista.setBounds(20, 50, 250, 14);
-		contentPane.add(lblLista);
+		panelEventos.add(lblLista, BorderLayout.NORTH);
 
-		JScrollPane scrollTable = new JScrollPane();
-		scrollTable.setBounds(20, 75, 300, 450);
-		contentPane.add(scrollTable);
-		
 		tableEventos = new JTable();
-		scrollTable.setViewportView(tableEventos);
+		tableEventos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableEventos.setDefaultEditor(Object.class, null);
+		panelEventos.add(new JScrollPane(tableEventos), BorderLayout.CENTER);
 
-		// --- PANEL DERECHO: CONTENIDO DEL REPORTAJE ---
-		JLabel lblDetalle = new JLabel("CONTENIDO DEL REPORTAJE");
+		return panelEventos;
+	}
+
+	private JPanel crearPanelDetalle() {
+		JPanel panelDetalle = new JPanel(new BorderLayout(0, 10));
+
+		JPanel panelTitulo = new JPanel(new BorderLayout(10, 0));
+		JLabel lblDetalle = new JLabel("CONTENIDO COMPLETO DEL REPORTAJE");
 		lblDetalle.setFont(new Font("Tahoma", Font.BOLD, 11));
-		lblDetalle.setBounds(350, 50, 300, 14);
-		contentPane.add(lblDetalle);
+		panelTitulo.add(lblDetalle, BorderLayout.WEST);
 
-		// Metadatos de la última versión (Anchos corregidos para evitar "...")
-		lblFechaVersion = new JLabel("ÚLTIMA VER: --/--/--");
-		lblFechaVersion.setBounds(630, 50, 150, 14); 
-		contentPane.add(lblFechaVersion);
+		JPanel panelMetadatos = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+		lblFechaVersion = new JLabel("Fecha: --/--/----");
+		lblHoraVersion = new JLabel("Hora: --:--");
+		panelMetadatos.add(lblFechaVersion);
+		panelMetadatos.add(lblHoraVersion);
+		panelTitulo.add(panelMetadatos, BorderLayout.EAST);
 
-		lblHoraVersion = new JLabel("HORA: --:--");
-		lblHoraVersion.setBounds(780, 50, 100, 14);
-		contentPane.add(lblHoraVersion);
+		panelDetalle.add(panelTitulo, BorderLayout.NORTH);
 
-		JLabel lblTit = new JLabel("TÍTULO:");
-		lblTit.setBounds(350, 80, 100, 14); 
-		contentPane.add(lblTit);
+		JSplitPane splitDetalle = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		splitDetalle.setResizeWeight(0.58);
+		splitDetalle.setDividerLocation(320);
+		splitDetalle.setTopComponent(crearPanelTexto());
+		splitDetalle.setBottomComponent(crearPanelMultimedia());
 
+		panelDetalle.add(splitDetalle, BorderLayout.CENTER);
+		panelDetalle.add(crearPanelAcciones(), BorderLayout.SOUTH);
+
+		return panelDetalle;
+	}
+
+	private JPanel crearPanelTexto() {
+		JPanel panelTexto = new JPanel(new BorderLayout(0, 8));
+		panelTexto.setBorder(BorderFactory.createTitledBorder("Texto del reportaje"));
+
+		JPanel panelCampos = new JPanel(new GridLayout(2, 1, 0, 6));
+
+		JPanel panelTitulo = new JPanel(new BorderLayout(0, 4));
+		panelTitulo.add(new JLabel("TITULO:"), BorderLayout.NORTH);
 		txtTitulo = new JTextField();
-		txtTitulo.setEditable(false); // Solo lectura
-		txtTitulo.setBounds(350, 100, 500, 25);
-		contentPane.add(txtTitulo);
+		txtTitulo.setEditable(false);
+		panelTitulo.add(txtTitulo, BorderLayout.CENTER);
+		panelCampos.add(panelTitulo);
 
-		JLabel lblSub = new JLabel("SUBTÍTULO:");
-		lblSub.setBounds(350, 140, 100, 14); 
-		contentPane.add(lblSub);
-
+		JPanel panelSubtitulo = new JPanel(new BorderLayout(0, 4));
+		panelSubtitulo.add(new JLabel("SUBTITULO:"), BorderLayout.NORTH);
 		txtSubtitulo = new JTextField();
-		txtSubtitulo.setEditable(false); // Solo lectura
-		txtSubtitulo.setBounds(350, 160, 500, 25);
-		contentPane.add(txtSubtitulo);
+		txtSubtitulo.setEditable(false);
+		panelSubtitulo.add(txtSubtitulo, BorderLayout.CENTER);
+		panelCampos.add(panelSubtitulo);
 
-		JLabel lblCuerpo = new JLabel("CUERPO:");
-		lblCuerpo.setBounds(350, 200, 100, 14); 
-		contentPane.add(lblCuerpo);
+		panelTexto.add(panelCampos, BorderLayout.NORTH);
 
-		JScrollPane scrollCuerpo = new JScrollPane();
-		scrollCuerpo.setBounds(350, 220, 500, 305);
-		contentPane.add(scrollCuerpo);
-
+		JPanel panelCuerpo = new JPanel(new BorderLayout(0, 4));
+		panelCuerpo.add(new JLabel("CUERPO:"), BorderLayout.NORTH);
 		txtCuerpo = new JTextArea();
-		txtCuerpo.setEditable(false); // Solo lectura
+		txtCuerpo.setEditable(false);
 		txtCuerpo.setLineWrap(true);
 		txtCuerpo.setWrapStyleWord(true);
-		scrollCuerpo.setViewportView(txtCuerpo);
+		panelCuerpo.add(new JScrollPane(txtCuerpo), BorderLayout.CENTER);
+		panelTexto.add(panelCuerpo, BorderLayout.CENTER);
+
+		return panelTexto;
+	}
+
+	private JPanel crearPanelMultimedia() {
+		JPanel panelMultimedia = new JPanel(new BorderLayout());
+		panelMultimedia.setBorder(BorderFactory.createTitledBorder("Multimedia definitivo asociado"));
+
+		JPanel panelPreviews = new JPanel(new GridLayout(1, 2, 10, 0));
+		panelPreviews.add(crearPanelPreviewFotos());
+		panelPreviews.add(crearPanelPreviewVideos());
+		panelMultimedia.add(panelPreviews, BorderLayout.CENTER);
+
+		return panelMultimedia;
+	}
+
+	private JPanel crearPanelPreviewFotos() {
+		JPanel panelFotos = new JPanel(new BorderLayout());
+		panelFotos.setBorder(BorderFactory.createTitledBorder("Fotos"));
+
+		lblPreviewFotos = new JLabel(
+			"<html><div style='text-align:center; padding:12px;'>"
+				+ "Aqui se mostraran las fotos<br/>"
+				+ "definitivas del reportaje."
+				+ "</div></html>",
+			SwingConstants.CENTER);
+		lblPreviewFotos.setBorder(BorderFactory.createEtchedBorder());
+		panelFotos.add(lblPreviewFotos, BorderLayout.CENTER);
+
+		return panelFotos;
+	}
+
+	private JPanel crearPanelPreviewVideos() {
+		JPanel panelVideos = new JPanel(new BorderLayout());
+		panelVideos.setBorder(BorderFactory.createTitledBorder("Videos"));
+
+		lblPreviewVideos = new JLabel(
+			"<html><div style='text-align:center; padding:12px;'>"
+				+ "Aqui se mostraran los videos<br/>"
+				+ "definitivos del reportaje."
+				+ "</div></html>",
+			SwingConstants.CENTER);
+		lblPreviewVideos.setBorder(BorderFactory.createEtchedBorder());
+		panelVideos.add(lblPreviewVideos, BorderLayout.CENTER);
+
+		return panelVideos;
+	}
+
+	private JPanel crearPanelAcciones() {
+		JPanel panelAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		btnDescargarJson = new JButton("Descargar reportaje JSON");
+		panelAcciones.add(btnDescargarJson);
+		return panelAcciones;
 	}
 }

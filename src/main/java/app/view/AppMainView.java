@@ -209,7 +209,7 @@ public class AppMainView {
 		panelBotonesEmpresa.add(btnAccionEmpresa1);
 		
 
-		btnAccederReportajes = new JButton("Visualizar reportajes autorizados");
+		btnAccederReportajes = new JButton("Visualizar reportajes multimedia");
 		panelBotonesEmpresa.add(btnAccederReportajes);
 
         // NUEVO: Añadimos el botón del informe a la interfaz
