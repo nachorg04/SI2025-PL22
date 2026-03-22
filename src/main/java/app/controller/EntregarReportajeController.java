@@ -3,6 +3,7 @@ package app.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
 import app.dto.EntregarReportajeDTO;
@@ -13,6 +14,10 @@ import giis.demo.util.SwingUtil;
 public class EntregarReportajeController {
 
     private static final String FILTRO_PENDIENTES = "Pendientes de entrega";
+    private static final String TIPO_IMAGEN = "IMAGEN";
+    private static final String TIPO_VIDEO = "VIDEO";
+    private static final String ESTADO_BORRADOR = "BORRADOR";
+    private static final String ESTADO_DEFINITIVO = "DEFINITIVO";
 
     private EntregarReportajeModel model;
     private EntregarReportajeView view;
@@ -39,6 +44,22 @@ public class EntregarReportajeController {
         view.addVersionListener(e -> cargarVersionSeleccionada());
         view.addAceptarListener(e -> aceptarCambios());
         view.addRestaurarVersionListener(e -> restaurarVersionSeleccionada());
+        view.addAnadirImagenListener(e -> anadirMultimedia(TIPO_IMAGEN));
+        view.addAnadirVideoListener(e -> anadirMultimedia(TIPO_VIDEO));
+        view.addCambiarFotoABorradorListener(e -> cambiarEstadoMultimediaSeleccionada(view.getComboImagenesDefinitivas(),
+                ESTADO_BORRADOR, "foto"));
+        view.addCambiarVideoABorradorListener(e -> cambiarEstadoMultimediaSeleccionada(view.getComboVideosDefinitivos(),
+                ESTADO_BORRADOR, "video"));
+        view.addCambiarFotoADefinitivaListener(e -> cambiarEstadoMultimediaSeleccionada(view.getComboImagenesBorrador(),
+                ESTADO_DEFINITIVO, "foto"));
+        view.addCambiarVideoADefinitivoListener(e -> cambiarEstadoMultimediaSeleccionada(view.getComboVideosBorrador(),
+                ESTADO_DEFINITIVO, "video"));
+        view.addEliminarFotoListener(
+                e -> eliminarMultimediaSeleccionada((EntregarReportajeDTO) view.getComboImagenesBorrador().getSelectedItem(),
+                        "foto"));
+        view.addEliminarVideoListener(
+                e -> eliminarMultimediaSeleccionada((EntregarReportajeDTO) view.getComboVideosBorrador().getSelectedItem(),
+                        "video"));
     }
 
     private boolean isModoPendientes() {
@@ -54,6 +75,7 @@ public class EntregarReportajeController {
             eventos = model.getEventosPendientes(nombreReportero);
             view.setTituloEditable(true);
             view.setContenidoEditable(true);
+            view.setMultimediaEditable(true);
             view.setTextoBotonAceptar("Entregar");
             view.setMensajePermisos("");
             view.setSeccionVersionesVisible(false);
@@ -80,20 +102,14 @@ public class EntregarReportajeController {
             view.getComboVersiones().removeAllItems();
             view.setTituloEditable(isModoPendientes());
             view.setContenidoEditable(isModoPendientes());
+            view.setMultimediaEditable(false);
             view.setSeccionVersionesVisible(false);
             versionesCargadas = new ArrayList<>();
             return;
         }
 
         if (isModoPendientes()) {
-            view.limpiarCampos();
-            view.limpiarVersionSeleccionada();
-            view.getComboVersiones().removeAllItems();
-            view.setTituloEditable(true);
-            view.setContenidoEditable(true);
-            view.setMensajePermisos("");
-            view.setSeccionVersionesVisible(false);
-            versionesCargadas = new ArrayList<>();
+            cargarPendiente(seleccionado);
             return;
         }
 
@@ -103,6 +119,7 @@ public class EntregarReportajeController {
             view.limpiarVersionSeleccionada();
             view.getComboVersiones().removeAllItems();
             view.setContenidoEditable(false);
+            view.setMultimediaEditable(false);
             view.setSeccionVersionesVisible(false);
             view.setMensajePermisos("No se encontró contenido para el evento seleccionado.");
             return;
@@ -113,16 +130,46 @@ public class EntregarReportajeController {
         view.setCuerpo(reportaje.getCuerpo());
         view.setTituloEditable(false);
 
-        boolean editable = reportaje.isEditablePorReportero();
-        view.setContenidoEditable(editable);
-        view.setSeccionVersionesVisible(editable);
-        if (editable) {
-            view.setMensajePermisos("Puedes modificar subtítulo/cuerpo o restaurar una versión previa.");
-        } else {
-            view.setMensajePermisos("Solo el reportero que entregó el reportaje puede modificar o restaurar.");
-        }
+        boolean editableContenido = reportaje.isEditablePorReportero();
+        view.setContenidoEditable(editableContenido);
+        view.setSeccionVersionesVisible(editableContenido);
+        view.setMultimediaEditable(true);
+        view.setMensajePermisos(construirMensajePermisosEntregado(reportaje));
 
         cargarVersiones(reportaje.getId_reportaje());
+        cargarMultimedia(reportaje.getId_reportaje());
+    }
+
+    private void cargarPendiente(EntregarReportajeDTO seleccionado) {
+        EntregarReportajeDTO borrador = model.getBorradorPorEvento(seleccionado.getId_evento(), nombreReportero);
+        view.getComboVersiones().removeAllItems();
+        view.limpiarVersionSeleccionada();
+        view.setTituloEditable(true);
+        view.setContenidoEditable(true);
+        view.setMultimediaEditable(true);
+        view.setSeccionVersionesVisible(false);
+        view.setMensajePermisos(
+                "En pendientes también puedes añadir y modificar multimedia; el borrador se crea al guardar el primer archivo y cada ruta debe ser única.");
+
+        if (borrador == null || borrador.getId_reportaje() == null) {
+            view.setTitulo("");
+            view.setSubtitulo("");
+            view.setCuerpo("");
+            view.limpiarMultimedia();
+            return;
+        }
+
+        view.setTitulo(borrador.getTitulo());
+        view.setSubtitulo(borrador.getSubtitulo());
+        view.setCuerpo(borrador.getCuerpo());
+        cargarMultimedia(borrador.getId_reportaje());
+    }
+
+    private String construirMensajePermisosEntregado(EntregarReportajeDTO reportaje) {
+        if (reportaje.isEditablePorReportero()) {
+            return "Puedes modificar subtítulo/cuerpo, restaurar versiones y gestionar el multimedia que añadas.";
+        }
+        return "Puedes añadir multimedia; solo quien lo sube puede cambiar su estado o borrarlo.";
     }
 
     private void cargarVersiones(int idReportaje) {
@@ -136,6 +183,24 @@ public class EntregarReportajeController {
         }
 
         cargarVersionSeleccionada();
+    }
+
+    private void cargarMultimedia(int idReportaje) {
+        recargarComboMultimedia(view.getComboImagenesDefinitivas(), model.getMultimedia(idReportaje, TIPO_IMAGEN,
+                ESTADO_DEFINITIVO, nombreReportero));
+        recargarComboMultimedia(view.getComboVideosDefinitivos(), model.getMultimedia(idReportaje, TIPO_VIDEO,
+                ESTADO_DEFINITIVO, nombreReportero));
+        recargarComboMultimedia(view.getComboImagenesBorrador(), model.getMultimedia(idReportaje, TIPO_IMAGEN,
+                ESTADO_BORRADOR, nombreReportero));
+        recargarComboMultimedia(view.getComboVideosBorrador(), model.getMultimedia(idReportaje, TIPO_VIDEO,
+                ESTADO_BORRADOR, nombreReportero));
+    }
+
+    private void recargarComboMultimedia(JComboBox<EntregarReportajeDTO> combo, List<EntregarReportajeDTO> elementos) {
+        combo.removeAllItems();
+        for (EntregarReportajeDTO elemento : elementos) {
+            combo.addItem(elemento);
+        }
     }
 
     private void cargarVersionSeleccionada() {
@@ -184,12 +249,18 @@ public class EntregarReportajeController {
             return;
         }
 
-        if (model.existeTitulo(titulo)) {
+        EntregarReportajeDTO borrador = model.getBorradorPorEvento(eventoSeleccionado.getId_evento(), nombreReportero);
+        Integer idReportajeActual = borrador == null ? null : borrador.getId_reportaje();
+        if (model.existeTituloEnOtroReportaje(titulo, idReportajeActual)) {
             SwingUtil.showMessage("Ya existe un reportaje con ese título.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        model.insertarReportaje(eventoSeleccionado.getId_evento(), nombreReportero, titulo, subtitulo, cuerpo);
+        if (idReportajeActual == null) {
+            model.insertarReportaje(eventoSeleccionado.getId_evento(), nombreReportero, titulo, subtitulo, cuerpo);
+        } else {
+            model.entregarBorrador(idReportajeActual, nombreReportero, titulo, subtitulo, cuerpo);
+        }
         SwingUtil.showMessage("Reportaje entregado correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
         recargarEventosSegunFiltro();
     }
@@ -223,6 +294,111 @@ public class EntregarReportajeController {
         }
 
         registrarActualizacion(actual, nuevoSubtitulo, nuevoCuerpo, "Cambios guardados y versión registrada correctamente.");
+    }
+
+    private void anadirMultimedia(String tipo) {
+        EntregarReportajeDTO actual = getReportajeSeleccionadoParaMultimedia();
+        if (actual == null) {
+            return;
+        }
+
+        String ruta = TIPO_IMAGEN.equals(tipo) ? view.getRutaImagen().trim() : view.getRutaVideo().trim();
+        if (ruta.isEmpty()) {
+            SwingUtil.showMessage("Debes indicar una ruta antes de añadir el contenido multimedia.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (model.existeRutaMultimedia(ruta)) {
+            SwingUtil.showMessage("Esa ruta ya está registrada para otro contenido multimedia.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        model.insertarMultimedia(actual.getId_reportaje(), nombreReportero, tipo, ruta);
+        if (TIPO_IMAGEN.equals(tipo)) {
+            view.limpiarRutaImagen();
+        } else {
+            view.limpiarRutaVideo();
+        }
+        cargarMultimedia(actual.getId_reportaje());
+        SwingUtil.showMessage(tipo.equals(TIPO_IMAGEN) ? "Imagen añadida en estado borrador." : "Vídeo añadido en estado borrador.",
+                "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void cambiarEstadoMultimediaSeleccionada(JComboBox<EntregarReportajeDTO> combo, String nuevoEstado,
+            String etiqueta) {
+        EntregarReportajeDTO multimedia = (EntregarReportajeDTO) combo.getSelectedItem();
+        if (multimedia == null) {
+            SwingUtil.showMessage("Debes seleccionar un " + etiqueta + ".", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!multimedia.isEditableMultimediaPorReportero()) {
+            SwingUtil.showMessage("Solo el reportero que añadió este " + etiqueta + " puede cambiar su estado.",
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        model.actualizarEstadoMultimedia(multimedia.getId_multimedia(), nuevoEstado);
+        recargarMultimediaActual();
+        SwingUtil.showMessage("Estado del " + etiqueta + " actualizado correctamente.", "Éxito",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void eliminarMultimediaSeleccionada(EntregarReportajeDTO multimedia, String etiqueta) {
+        if (multimedia == null) {
+            SwingUtil.showMessage("Debes seleccionar un " + etiqueta + ".", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!multimedia.isEditableMultimediaPorReportero()) {
+            SwingUtil.showMessage("Solo el reportero que añadió este " + etiqueta + " puede eliminarlo.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        model.eliminarMultimedia(multimedia.getId_multimedia());
+        recargarMultimediaActual();
+        SwingUtil.showMessage("" + Character.toUpperCase(etiqueta.charAt(0)) + etiqueta.substring(1)
+                + " eliminado correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void recargarMultimediaActual() {
+        EntregarReportajeDTO actual = getReportajeSeleccionadoParaMultimedia();
+        if (actual != null) {
+            cargarMultimedia(actual.getId_reportaje());
+        }
+    }
+
+    private EntregarReportajeDTO getReportajeSeleccionadoParaMultimedia() {
+        EntregarReportajeDTO eventoSeleccionado = (EntregarReportajeDTO) view.getComboEventos().getSelectedItem();
+        if (eventoSeleccionado == null) {
+            SwingUtil.showMessage("Debes seleccionar un evento.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+
+        if (isModoPendientes()) {
+            EntregarReportajeDTO borrador = model.getBorradorPorEvento(eventoSeleccionado.getId_evento(), nombreReportero);
+            if (borrador != null && borrador.getId_reportaje() != null) {
+                return borrador;
+            }
+            model.crearBorradorSiNoExiste(eventoSeleccionado.getId_evento());
+            borrador = model.getBorradorPorEvento(eventoSeleccionado.getId_evento(), nombreReportero);
+            if (borrador != null && borrador.getId_reportaje() != null) {
+                cargarPendiente(eventoSeleccionado);
+            }
+            if (borrador == null || borrador.getId_reportaje() == null) {
+                SwingUtil.showMessage("No se pudo preparar el borrador del reportaje.", "Error", JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+            return borrador;
+        }
+
+        EntregarReportajeDTO actual = model.getReportajePorEvento(eventoSeleccionado.getId_evento(), nombreReportero);
+        if (actual == null) {
+            SwingUtil.showMessage("No se encontró reportaje para el evento seleccionado.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+        return actual;
     }
 
     private void restaurarVersionSeleccionada() {

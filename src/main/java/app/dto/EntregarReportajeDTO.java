@@ -18,6 +18,14 @@ public class EntregarReportajeDTO {
     private String subtitulo_guardado;
     private String cuerpo_guardado;
 
+    private Integer id_multimedia;
+    private Integer id_reportero_multimedia;
+    private String nombre_reportero_multimedia;
+    private String ruta;
+    private String tipo;
+    private String estado;
+    private Integer editable_multimedia;
+
     public EntregarReportajeDTO() {
         // Constructor vacio para mapeo de dbutils
     }
@@ -134,8 +142,68 @@ public class EntregarReportajeDTO {
         this.cuerpo_guardado = cuerpo_guardado;
     }
 
+    public Integer getId_multimedia() {
+        return id_multimedia;
+    }
+
+    public void setId_multimedia(Integer id_multimedia) {
+        this.id_multimedia = id_multimedia;
+    }
+
+    public Integer getId_reportero_multimedia() {
+        return id_reportero_multimedia;
+    }
+
+    public void setId_reportero_multimedia(Integer id_reportero_multimedia) {
+        this.id_reportero_multimedia = id_reportero_multimedia;
+    }
+
+    public String getNombre_reportero_multimedia() {
+        return nombre_reportero_multimedia;
+    }
+
+    public void setNombre_reportero_multimedia(String nombre_reportero_multimedia) {
+        this.nombre_reportero_multimedia = nombre_reportero_multimedia;
+    }
+
+    public String getRuta() {
+        return ruta;
+    }
+
+    public void setRuta(String ruta) {
+        this.ruta = ruta;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public Integer getEditable_multimedia() {
+        return editable_multimedia;
+    }
+
+    public void setEditable_multimedia(Integer editable_multimedia) {
+        this.editable_multimedia = editable_multimedia;
+    }
+
     public boolean isEditablePorReportero() {
         return editable != null && editable == 1;
+    }
+
+    public boolean isEditableMultimediaPorReportero() {
+        return editable_multimedia != null && editable_multimedia == 1;
     }
 
     public String getResumenCambios() {
@@ -153,6 +221,12 @@ public class EntregarReportajeDTO {
 
     @Override
     public String toString() {
+        if (ruta != null && !ruta.isBlank()) {
+            if (nombre_reportero_multimedia != null && !nombre_reportero_multimedia.isBlank()) {
+                return ruta + " (" + nombre_reportero_multimedia + ")";
+            }
+            return ruta;
+        }
         return id_evento + " - " + descripcion;
     }
 }
