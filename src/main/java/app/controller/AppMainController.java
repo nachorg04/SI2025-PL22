@@ -4,12 +4,16 @@ package app.controller;
 
 import javax.swing.JOptionPane;
 
+
 import app.model.AccederReportajeModel;
 import app.model.AppMainModel;
 import app.view.AccederReportajeView;
 import app.view.AppMainView;
 import giis.demo.util.Database; // Asumo que esta es la ruta de tu BD según mensajes anteriores
 import giis.demo.util.SwingUtil;
+import app.model.EscogerEventoFreelanceModel;
+import app.view.EscogerEventoFreelanceView;
+
 
 public class AppMainController {
 
@@ -47,6 +51,9 @@ public class AppMainController {
 		// Reportero
 		this.view.addEntregarReportajeListener(e -> ejecutarEntregarReportaje());
 		this.view.addRevisarReportajesListener(e -> ejecutarRevisarReportajes());
+		this.view.addEscogerEventoFreelanceListener(e -> ejecutarEscogerEventoFreelance());
+
+
 		// Agente
 		this.view.addAccionAgente1Listener(e -> ejecutarAccionAgente1());
 		this.view.addAccionAgente2Listener(e -> ejecutarAccionAgente2());
@@ -108,6 +115,25 @@ public class AppMainController {
 			app.model.RevisarReportajeModel modelo = new app.model.RevisarReportajeModel();
 			app.view.RevisarReportajesView vista = new app.view.RevisarReportajesView();
 			new app.controller.RevisarReportajeController(modelo, vista, reporteroSeleccionado);
+		}
+			
+		private void ejecutarEscogerEventoFreelance() {
+			if (view.getComboReportero().getSelectedItem() == null) {
+				SwingUtil.showMessage("Debes seleccionar un reportero", "ERROR", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+
+			String reporteroSeleccionado = (String) view.getComboReportero().getSelectedItem();
+			EscogerEventoFreelanceModel modelo = new EscogerEventoFreelanceModel();
+
+			if (!modelo.esFreelance(reporteroSeleccionado)) {
+				SwingUtil.showMessage("El reportero seleccionado no es freelance.", "Aviso",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+
+			EscogerEventoFreelanceView vista = new EscogerEventoFreelanceView();
+			new EscogerEventoFreelanceController(modelo, vista, reporteroSeleccionado);
 		}
 
 
