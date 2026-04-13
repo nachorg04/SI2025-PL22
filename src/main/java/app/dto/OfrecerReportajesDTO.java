@@ -11,6 +11,11 @@ public class OfrecerReportajesDTO {
     private int id_empresa;
     private String nombre_empresa;
     private String email;
+    private double tarifa_plana;
+    private int tiene_tarifa_plana;
+    private int al_corriente_pago;
+    private String tarifa_plana_info;
+    private String pago_info;
 
     // Atributos del ofrecimiento
     private String estado;
@@ -43,6 +48,21 @@ public class OfrecerReportajesDTO {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public double getTarifa_plana() { return tarifa_plana; }
+    public void setTarifa_plana(double tarifa_plana) { this.tarifa_plana = tarifa_plana; }
+
+    public int getTiene_tarifa_plana() { return tiene_tarifa_plana; }
+    public void setTiene_tarifa_plana(int tiene_tarifa_plana) { this.tiene_tarifa_plana = tiene_tarifa_plana; }
+
+    public int getAl_corriente_pago() { return al_corriente_pago; }
+    public void setAl_corriente_pago(int al_corriente_pago) { this.al_corriente_pago = al_corriente_pago; }
+
+    public String getTarifa_plana_info() { return tarifa_plana_info; }
+    public void setTarifa_plana_info(String tarifa_plana_info) { this.tarifa_plana_info = tarifa_plana_info; }
+
+    public String getPago_info() { return pago_info; }
+    public void setPago_info(String pago_info) { this.pago_info = pago_info; }
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }

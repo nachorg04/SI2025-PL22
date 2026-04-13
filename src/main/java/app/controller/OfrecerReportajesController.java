@@ -27,7 +27,7 @@ public class OfrecerReportajesController {
 	public void initView() {
 		view.lblAgenciaSeleccionada.setText("Agencia: " + agenciaActual);
 		cargarEventos();
-		configurarEstadoFiltroEspecializacion(false);
+		configurarEstadoFiltrosOferta(false);
 
 		view.tableEventos.getSelectionModel().addListSelectionListener(e -> {
 			if (!e.getValueIsAdjusting()) {
@@ -43,6 +43,13 @@ public class OfrecerReportajesController {
 		});
 
 		view.chkCoincidenciaTematicas.addActionListener(e -> {
+			int fila = view.tableEventos.getSelectedRow();
+			if (fila != -1) {
+				actualizarTablasDependientes();
+			}
+		});
+
+		view.chkSoloTarifaPlana.addActionListener(e -> {
 			int fila = view.tableEventos.getSelectedRow();
 			if (fila != -1) {
 				actualizarTablasDependientes();
@@ -68,7 +75,8 @@ public class OfrecerReportajesController {
 		view.btnLimpiarSeleccion.addActionListener(e -> {
 			view.tableEventos.clearSelection();
 			view.chkCoincidenciaTematicas.setSelected(false);
-			configurarEstadoFiltroEspecializacion(false);
+			view.chkSoloTarifaPlana.setSelected(false);
+			configurarEstadoFiltrosOferta(false);
 			limpiarTablas();
 			operacionesRealizadas = 0;
 		});
@@ -88,16 +96,18 @@ public class OfrecerReportajesController {
 		view.lblTematicasEvento.setText("Tematicas del evento: " + eventoSeleccionado.getTematicas_evento());
 
 		boolean mostrandoSinOferta = view.comboFiltroEmpresas.getSelectedIndex() == 0;
-		configurarEstadoFiltroEspecializacion(mostrandoSinOferta);
+		configurarEstadoFiltrosOferta(mostrandoSinOferta);
 
 		cargarEmpresasSegunFiltro(idEvento);
 		cargarOfertasEnCurso(idEvento);
 	}
 
-	private void configurarEstadoFiltroEspecializacion(boolean habilitado) {
+	private void configurarEstadoFiltrosOferta(boolean habilitado) {
 		view.chkCoincidenciaTematicas.setEnabled(habilitado);
+		view.chkSoloTarifaPlana.setEnabled(habilitado);
 		if (!habilitado) {
 			view.chkCoincidenciaTematicas.setSelected(false);
+			view.chkSoloTarifaPlana.setSelected(false);
 		}
 	}
 
@@ -137,19 +147,33 @@ public class OfrecerReportajesController {
 
 		int idEvento = (int) view.tableEventos.getValueAt(filaEvento, 0);
 		boolean cambios = false;
+		StringBuilder noPermitidasPago = new StringBuilder();
 
 		for (int r = 0; r < view.tableEmpresas.getRowCount(); r++) {
-			Boolean check = (Boolean) view.tableEmpresas.getValueAt(r, 2);
+			Boolean check = (Boolean) view.tableEmpresas.getValueAt(r, 4);
 			if (check != null && check) {
+				if (!estaAlCorrienteLaFila(r)) {
+					if (noPermitidasPago.length() > 0) {
+						noPermitidasPago.append(", ");
+					}
+					noPermitidasPago.append(view.tableEmpresas.getValueAt(r, 1));
+					continue;
+				}
 				model.insertarOfrecimientos(idEvento, (int) view.tableEmpresas.getValueAt(r, 0));
 				operacionesRealizadas++;
 				cambios = true;
 			}
 		}
 
+		if (noPermitidasPago.length() > 0) {
+			SwingUtil.showMessage(
+					"No se puede ofertar a empresas que no estan al corriente de pago: " + noPermitidasPago,
+					"Aviso", 1);
+		}
+
 		if (cambios) {
 			actualizarTablasDependientes();
-		} else {
+		} else if (noPermitidasPago.length() == 0) {
 			SwingUtil.showMessage("No hay empresas seleccionadas.", "Aviso", 1);
 		}
 	}
@@ -158,19 +182,20 @@ public class OfrecerReportajesController {
 		int filtro = view.comboFiltroEmpresas.getSelectedIndex();
 		if (filtro == 0) {
 			boolean soloCoincidentes = view.chkCoincidenciaTematicas.isSelected();
-			configurarTablaConChecks(model.getEmpresasSinOferta(idEvento, soloCoincidentes));
+			boolean soloTarifaPlana = view.chkSoloTarifaPlana.isSelected();
+			configurarTablaConChecks(model.getEmpresasSinOferta(idEvento, agenciaActual, soloCoincidentes, soloTarifaPlana));
 			view.btnOfertar.setEnabled(true);
 		} else {
-			String[] cols = { "id_empresa", "nombre_empresa", "estado" };
-			view.tableEmpresas.setModel(SwingUtil.getTableModelFromPojos(model.getEmpresasConOferta(idEvento), cols));
+			String[] cols = { "id_empresa", "nombre_empresa", "tarifa_plana_info", "pago_info", "estado" };
+			view.tableEmpresas.setModel(SwingUtil.getTableModelFromPojos(model.getEmpresasConOferta(idEvento, agenciaActual), cols));
 			view.btnOfertar.setEnabled(false);
 		}
 		SwingUtil.autoAdjustColumns(view.tableEmpresas);
 	}
 
 	private void cargarOfertasEnCurso(int idEvento) {
-		List<OfrecerReportajesDTO> ofertas = model.getEmpresasConOferta(idEvento);
-		String[] columnas = { "id_empresa", "nombre_empresa", "estado" };
+		List<OfrecerReportajesDTO> ofertas = model.getEmpresasConOferta(idEvento, agenciaActual);
+		String[] columnas = { "id_empresa", "nombre_empresa", "tarifa_plana_info", "pago_info", "estado" };
 		view.tableOfertasEnCurso.setModel(SwingUtil.getTableModelFromPojos(ofertas, columnas));
 		SwingUtil.autoAdjustColumns(view.tableOfertasEnCurso);
 	}
@@ -184,7 +209,7 @@ public class OfrecerReportajesController {
 	}
 
 	private void configurarTablaConChecks(List<OfrecerReportajesDTO> empresas) {
-		String[] columnas = { "id_empresa", "nombre_empresa" };
+		String[] columnas = { "id_empresa", "nombre_empresa", "tarifa_plana_info", "pago_info" };
 		DefaultTableModel tm = (DefaultTableModel) SwingUtil.getTableModelFromPojos(empresas, columnas);
 		tm.addColumn("Seleccionar");
 
@@ -207,7 +232,7 @@ public class OfrecerReportajesController {
 			@Override public int getColumnCount() { return tm.getColumnCount(); }
 			
 			@Override public Object getValueAt(int r, int c) { 
-				if (c == 2) {
+				if (c == 4) {
 					// Si hay embargo y la empresa NO los acepta, desmarcamos y bloqueamos
 					if (hayEmbargo && !empresas.get(r).isAcepta_embargos()) {
 						return false; 
@@ -221,24 +246,29 @@ public class OfrecerReportajesController {
 				fireTableCellUpdated(r, c); 
 			}
 			
-			@Override public Class<?> getColumnClass(int c) { return c == 2 ? Boolean.class : Object.class; }
+			@Override public Class<?> getColumnClass(int c) { return c == 4 ? Boolean.class : Object.class; }
 			
 			@Override public boolean isCellEditable(int r, int c) { 
-				if (c == 2) {
+				if (c == 4) {
 					// Magia: Bloqueamos la edicion del checkbox si rechaza embargos
 					if (hayEmbargo && !empresas.get(r).isAcepta_embargos()) {
 						return false; 
 					}
-					return true;
+					return estaAlCorrienteLaFila(r);
 				}
 				return false; 
 			}
 			
 			@Override public String getColumnName(int c) { 
 				// Cambiamos el titulo para que el agente sepa por que no puede pulsar
-				return c == 2 ? (hayEmbargo ? "Sel. (Bloqueos)" : "Seleccionar") : tm.getColumnName(c); 
+				return c == 4 ? (hayEmbargo ? "Sel. (Bloqueos)" : "Seleccionar") : tm.getColumnName(c); 
 			}
 		});
+	}
+
+	private boolean estaAlCorrienteLaFila(int fila) {
+		Object valor = view.tableEmpresas.getValueAt(fila, 3);
+		return valor != null && "SI".equalsIgnoreCase(valor.toString());
 	}
 
 	private void limpiarTablas() {

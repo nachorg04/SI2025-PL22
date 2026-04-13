@@ -29,7 +29,10 @@ public class OfrecerReportajesView extends JFrame {
 
 	// Filtros de la HU #34081
 	public JCheckBox chkCoincidenciaTematicas;
+	public JCheckBox chkSoloTarifaPlana;
 	public JLabel lblTematicasEvento;
+	public JLabel lblInfoTarifaPago;
+	public JLabel lblInfoAsignacionFinalizada;
 
 	// Botones
 	public JButton btnOfertar;
@@ -55,13 +58,17 @@ public class OfrecerReportajesView extends JFrame {
 		contentPane.add(lblAgenciaSeleccionada);
 
 		// --- COLUMNA 1: EVENTOS ---
-		JLabel lblEventos = new JLabel("EVENTOS CON REPORTEROS ASIGNADOS:");
+		JLabel lblEventos = new JLabel("EVENTOS CON ASIGNACION FINALIZADA:");
 		lblEventos.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblEventos.setBounds(20, 30, 300, 14);
 		contentPane.add(lblEventos);
 
+		lblInfoAsignacionFinalizada = new JLabel("Solo se podran ofertar eventos con asignacion finalizada.");
+		lblInfoAsignacionFinalizada.setBounds(20, 48, 300, 14);
+		contentPane.add(lblInfoAsignacionFinalizada);
+
 		JScrollPane scrollEventos = new JScrollPane();
-		scrollEventos.setBounds(20, 55, 300, 520);
+		scrollEventos.setBounds(20, 70, 300, 505);
 		contentPane.add(scrollEventos);
 
 		tableEventos = new JTable();
@@ -85,12 +92,20 @@ public class OfrecerReportajesView extends JFrame {
 		chkCoincidenciaTematicas.setBounds(340, 90, 330, 23);
 		contentPane.add(chkCoincidenciaTematicas);
 
+		chkSoloTarifaPlana = new JCheckBox("Mostrar solo empresas con tarifa plana");
+		chkSoloTarifaPlana.setBounds(340, 118, 330, 23);
+		contentPane.add(chkSoloTarifaPlana);
+
 		lblTematicasEvento = new JLabel("Tematicas del evento: -");
-		lblTematicasEvento.setBounds(340, 118, 330, 20);
+		lblTematicasEvento.setBounds(340, 146, 330, 20);
 		contentPane.add(lblTematicasEvento);
 
+		lblInfoTarifaPago = new JLabel("Solo se podra ofertar a empresas al corriente de pago.");
+		lblInfoTarifaPago.setBounds(340, 168, 330, 20);
+		contentPane.add(lblInfoTarifaPago);
+
 		JScrollPane scrollEmpresas = new JScrollPane();
-		scrollEmpresas.setBounds(340, 145, 330, 335);
+		scrollEmpresas.setBounds(340, 195, 330, 285);
 		contentPane.add(scrollEmpresas);
 
 		tableEmpresas = new JTable();
