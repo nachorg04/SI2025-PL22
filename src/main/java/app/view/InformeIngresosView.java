@@ -11,6 +11,7 @@ public class InformeIngresosView {
 	private JTable tableSinTarifa;    
 	
 	private JLabel lblAgenciaNombre;
+	private JComboBox<String> cbTematica;
 	private JLabel lblEventoSeleccionado;
 	private JLabel lblSumatorioTarifa;
 	private JLabel lblSumatorioSinTarifa;
@@ -27,22 +28,32 @@ public class InformeIngresosView {
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(10, 10));
 
-		// --- PANEL SUPERIOR: Eventos ---
+		// --- PANEL SUPERIOR: Filtro y Eventos ---
 		JPanel pnlSuperior = new JPanel();
 		pnlSuperior.setLayout(new BoxLayout(pnlSuperior, BoxLayout.Y_AXIS));
 		pnlSuperior.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+		// Cabecera con Nombre y Filtro
+		JPanel pnlCabecera = new JPanel(new GridLayout(2, 1, 5, 5));
 		lblAgenciaNombre = new JLabel("Agencia: Cargando...");
 		lblAgenciaNombre.setFont(new Font("Tahoma", Font.BOLD, 14));
-		pnlSuperior.add(lblAgenciaNombre);
+		pnlCabecera.add(lblAgenciaNombre);
+
+		JPanel pnlFiltro = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		pnlFiltro.add(new JLabel("Filtrar eventos por temática:  "));
+		cbTematica = new JComboBox<String>();
+		pnlFiltro.add(cbTematica);
+		pnlCabecera.add(pnlFiltro);
+		
+		pnlCabecera.setAlignmentX(Component.LEFT_ALIGNMENT);
+		pnlSuperior.add(pnlCabecera);
 		pnlSuperior.add(Box.createVerticalStrut(10));
 
-		pnlSuperior.add(new JLabel("Eventos agrupados por temática:"));
-		pnlSuperior.add(Box.createVerticalStrut(5));
-
+		// Tabla de arriba
 		tableEventos = new JTable();
 		JScrollPane scrollEventos = new JScrollPane(tableEventos);
 		scrollEventos.setPreferredSize(new Dimension(950, 200));
+		scrollEventos.setAlignmentX(Component.LEFT_ALIGNMENT);
 		pnlSuperior.add(scrollEventos);
 
 		frame.getContentPane().add(pnlSuperior, BorderLayout.NORTH);
@@ -87,10 +98,12 @@ public class InformeIngresosView {
 		frame.getContentPane().add(pnlInferior, BorderLayout.SOUTH);
 	}
 
+	// Getters
 	public JFrame getFrame() { return frame; }
 	public JTable getTableEventos() { return tableEventos; }
 	public JTable getTableTarifaPlana() { return tableTarifaPlana; }
 	public JTable getTableSinTarifa() { return tableSinTarifa; }
+	public JComboBox<String> getCbTematica() { return cbTematica; } // <-- Getter del combo
 	public JLabel getLblAgenciaNombre() { return lblAgenciaNombre; }
 	public JLabel getLblEventoSeleccionado() { return lblEventoSeleccionado; }
 	public JLabel getLblSumatorioTarifa() { return lblSumatorioTarifa; }

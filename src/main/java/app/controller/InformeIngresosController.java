@@ -1,8 +1,10 @@
 package app.controller;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -28,11 +30,18 @@ public class InformeIngresosController {
     }
 
     public void initController() {
-        view.getLblAgenciaNombre().setText("Agencia: " + nombreAgenciaLogueada);
+        view.getLblAgenciaNombre().setText("🏢 Agencia: " + nombreAgenciaLogueada);
 
+        // 1. Cargamos todos los datos de la base de datos a memoria
+        datosBD = model.obtenerIngresosPorAgencia(nombreAgenciaLogueada);
+
+        // 2. Rellenamos el desplegable con las temáticas disponibles
+        cargarComboTematicas();
+
+        // 3. Cargamos la tabla superior por primera vez
         cargarTablaEventos();
 
-        // Escuchador para cuando el usuario pincha en un evento de la tabla superior
+        // 4. Escuchador: Cuando seleccionas un Evento en la tabla de arriba -> actualiza abajo
         view.getTableEventos().getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -42,12 +51,41 @@ public class InformeIngresosController {
             }
         });
 
+        // 5. Escuchador NUEVO: Cuando cambias la Temática en el desplegable -> actualiza arriba y limpia abajo
+        view.getCbTematica().addActionListener(e -> {
+            cargarTablaEventos();
+            limpiarTablasDetalle();
+        });
+
         // Botón Volver
         view.getBtnVolver().addActionListener(e -> view.getFrame().dispose());
     }
 
+    /**
+     * Rellena el JComboBox extrayendo las temáticas únicas de la lista de datos
+     */
+    private void cargarComboTematicas() {
+        // Usamos un Set para no meter temáticas repetidas
+        Set<String> tematicasUnicas = new LinkedHashSet<>();
+        tematicasUnicas.add("Todas las temáticas"); // Añadimos la opción de ver todo
+        
+        for (InformeIngresosDTO dto : datosBD) {
+            if (dto.getTematica() != null) {
+                tematicasUnicas.add(dto.getTematica());
+            }
+        }
+        
+        for (String t : tematicasUnicas) {
+            view.getCbTematica().addItem(t);
+        }
+    }
+
+    /**
+     * Carga la tabla de arriba filtrando por la temática seleccionada en el combo
+     */
     private void cargarTablaEventos() {
-        datosBD = model.obtenerIngresosPorAgencia(nombreAgenciaLogueada);
+        String tematicaSeleccionada = (String) view.getCbTematica().getSelectedItem();
+        if (tematicaSeleccionada == null) return;
 
         DefaultTableModel modeloEventos = new DefaultTableModel(new Object[]{"Temática", "ID Evento", "Nombre del evento", "Total Ingresos (€)"}, 0);
         
@@ -55,6 +93,12 @@ public class InformeIngresosController {
         Map<Integer, InformeIngresosDTO> infoEvento = new LinkedHashMap<>();
 
         for (InformeIngresosDTO dto : datosBD) {
+            // --- FILTRO MÁGICO ---
+            // Si el combo no dice "Todas" y la temática de esta fila no coincide, la saltamos
+            if (!"Todas las temáticas".equals(tematicaSeleccionada) && !tematicaSeleccionada.equals(dto.getTematica())) {
+                continue; 
+            }
+            
             if (!infoEvento.containsKey(dto.getId_evento())) {
                 infoEvento.put(dto.getId_evento(), dto);
                 totalPorEvento.put(dto.getId_evento(), 0.0);
@@ -109,6 +153,17 @@ public class InformeIngresosController {
         
         view.getLblSumatorioTarifa().setText(String.format("Sumatorio con tarifa plana: %.2f €", totalTarifa));
         view.getLblSumatorioSinTarifa().setText(String.format("Sumatorio sin tarifa plana: %.2f €", totalSinTarifa));
+    }
+    
+    /**
+     * Limpia las tablas de detalle cuando se cambia el filtro de arriba
+     */
+    private void limpiarTablasDetalle() {
+        view.getLblEventoSeleccionado().setText("Detalles del evento seleccionado: [Ninguno]");
+        view.getTableTarifaPlana().setModel(new DefaultTableModel(new Object[]{"Empresa", "Acceso", "Cuota mensual"}, 0));
+        view.getTableSinTarifa().setModel(new DefaultTableModel(new Object[]{"Empresa", "Acceso", "Pagado"}, 0));
+        view.getLblSumatorioTarifa().setText("Sumatorio con tarifa plana: 0.00 €");
+        view.getLblSumatorioSinTarifa().setText("Sumatorio sin tarifa plana: 0.00 €");
     }
     
     public void mostrarVista() {
