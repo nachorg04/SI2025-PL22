@@ -16,6 +16,8 @@ import app.model.EscogerEventoFreelanceModel;
 import app.view.EscogerEventoFreelanceView;
 import app.view.FinalizarReportajeView;
 import app.model.FinalizarReportajeModel;
+import app.model.CalculoDietasModel;
+import app.view.CalculoDietasView;
 
 
 public class AppMainController {
@@ -56,7 +58,7 @@ public class AppMainController {
 		this.view.addRevisarReportajesListener(e -> ejecutarRevisarReportajes());
 		this.view.addEscogerEventoFreelanceListener(e -> ejecutarEscogerEventoFreelance());
 		this.view.addFinalizarReportajeListener(e -> ejecutarFinalizarReportaje());
-
+		this.view.addCalculoDietasListener(e -> ejecutarCalculoDietas());
 		// Agente
 		this.view.addAccionAgente1Listener(e -> ejecutarAccionAgente1());
 		this.view.addAccionAgente2Listener(e -> ejecutarAccionAgente2());
@@ -173,7 +175,17 @@ public class AppMainController {
 			FinalizarReportajeView vista = new FinalizarReportajeView();
 			new FinalizarReportajeController(modelo, vista, reporteroSeleccionado);
 		}
+		private void ejecutarCalculoDietas() {
+			if (view.getComboReportero().getSelectedItem() == null) {
+				SwingUtil.showMessage("Debes seleccionar un reportero", "ERROR", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 
+			String reporteroSeleccionado = (String) view.getComboReportero().getSelectedItem();
+			CalculoDietasModel modelo = new CalculoDietasModel();
+			CalculoDietasView vista = new CalculoDietasView();
+			new CalculoDietasController(modelo, vista, reporteroSeleccionado);
+		}
 
 
 	// --- Lógica del Agente ---

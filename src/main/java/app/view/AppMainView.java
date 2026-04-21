@@ -38,6 +38,7 @@ public class AppMainView {
 	private JButton btnEntregarReportaje;
 	private JButton btnRevisarReportajes;
 	private JButton btnEscogerEventoFreelance;
+	private JButton btnCalculoDietas;
 	private JButton btnAccionAgente1;
 	private JButton btnAccionEmpresa1;
 	private JButton btnOfrecerReportajes; // Historia 33526
@@ -181,6 +182,9 @@ public class AppMainView {
 		btnEscogerEventoFreelance = new JButton("Escoger evento freelance");
 		panelBotonesReportero.add(btnEscogerEventoFreelance);
 		
+		btnCalculoDietas = new JButton("Calcular dietas");
+		panelBotonesReportero.add(btnCalculoDietas);
+		
 		btnFinalizarReportaje = new JButton("Finalizar reportaje");
 		panelBotonesReportero.add(btnFinalizarReportaje);
 
@@ -263,6 +267,10 @@ public class AppMainView {
 	
 	public void addEscogerEventoFreelanceListener(ActionListener listener) {
 	    btnEscogerEventoFreelance.addActionListener(listener);
+	}
+	
+	public void addCalculoDietasListener(ActionListener listener) {
+		btnCalculoDietas.addActionListener(listener);
 	}
 	
 	public void addFinalizarReportajeListener(ActionListener listener) {
