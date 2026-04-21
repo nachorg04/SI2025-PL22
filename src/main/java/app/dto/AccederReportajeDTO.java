@@ -2,6 +2,10 @@ package app.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Data Transfer Object para la historia de acceso a reportajes.
@@ -19,6 +23,9 @@ public class AccederReportajeDTO {
     private String cuerpo;
     private String fecha;
     private String hora;
+    private String fecha_fin_embargo;
+    private int acceso_especial_embargo;
+    private int tiene_acceso;
 
     // Campo auxiliar para recuperar multimedia desde SQL
     private String ruta;
@@ -54,6 +61,15 @@ public class AccederReportajeDTO {
     public String getHora() { return hora; }
     public void setHora(String hora) { this.hora = hora; }
 
+    public String getFecha_fin_embargo() { return fecha_fin_embargo; }
+    public void setFecha_fin_embargo(String fecha_fin_embargo) { this.fecha_fin_embargo = fecha_fin_embargo; }
+
+    public int getAcceso_especial_embargo() { return acceso_especial_embargo; }
+    public void setAcceso_especial_embargo(int acceso_especial_embargo) { this.acceso_especial_embargo = acceso_especial_embargo; }
+
+    public int getTiene_acceso() { return tiene_acceso; }
+    public void setTiene_acceso(int tiene_acceso) { this.tiene_acceso = tiene_acceso; }
+
     public String getRuta() { return ruta; }
     public void setRuta(String ruta) { this.ruta = ruta; }
 
@@ -62,4 +78,40 @@ public class AccederReportajeDTO {
 
     public List<String> getVideos() { return videos; }
     public void setVideos(List<String> videos) { this.videos = videos; }
+
+    public boolean isAccesoEspecialEmbargo() {
+        return acceso_especial_embargo == 1;
+    }
+
+    public boolean isEmbargoActivo() {
+        if (fecha_fin_embargo == null || fecha_fin_embargo.isBlank()) {
+            return false;
+        }
+        LocalDateTime fechaEmbargo = parseFechaEmbargo(fecha_fin_embargo);
+        return fechaEmbargo != null && fechaEmbargo.isAfter(LocalDateTime.now());
+    }
+
+    public boolean isAccesoBloqueadoPorEmbargo() {
+        return isEmbargoActivo() && !isAccesoEspecialEmbargo();
+    }
+
+    public boolean isAccesoSoloTextoPorEmbargo() {
+        return isEmbargoActivo() && isAccesoEspecialEmbargo();
+    }
+
+    public boolean isAccesoCompleto() {
+        return !isEmbargoActivo();
+    }
+
+    private LocalDateTime parseFechaEmbargo(String valor) {
+        try {
+            return LocalDateTime.parse(valor, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        } catch (DateTimeParseException e) {
+            try {
+                return LocalDate.parse(valor, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay();
+            } catch (DateTimeParseException ex) {
+                return null;
+            }
+        }
+    }
 }

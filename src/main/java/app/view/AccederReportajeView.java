@@ -34,6 +34,9 @@ public class AccederReportajeView extends JFrame {
 	public JLabel lblFechaVersion;
 	public JLabel lblHoraVersion;
 	public JLabel lblNombreEmpresa;
+	public JLabel lblEstadoAcceso;
+	public JLabel lblTipoAcceso;
+	public JLabel lblFechaAccesoEmbargo;
 	public JLabel lblPreviewFotos;
 	public JLabel lblPreviewVideos;
 	public JButton btnDescargarJson;
@@ -82,7 +85,7 @@ public class AccederReportajeView extends JFrame {
 		JPanel panelDetalle = new JPanel(new BorderLayout(0, 10));
 
 		JPanel panelTitulo = new JPanel(new BorderLayout(10, 0));
-		JLabel lblDetalle = new JLabel("CONTENIDO COMPLETO DEL REPORTAJE");
+		JLabel lblDetalle = new JLabel("ACCESO AL REPORTAJE");
 		lblDetalle.setFont(new Font("Tahoma", Font.BOLD, 11));
 		panelTitulo.add(lblDetalle, BorderLayout.WEST);
 
@@ -102,14 +105,32 @@ public class AccederReportajeView extends JFrame {
 		splitDetalle.setBottomComponent(crearPanelMultimedia());
 
 		panelDetalle.add(splitDetalle, BorderLayout.CENTER);
-		panelDetalle.add(crearPanelAcciones(), BorderLayout.SOUTH);
+
+		JPanel panelInferior = new JPanel(new BorderLayout(0, 8));
+		panelInferior.add(crearPanelEstadoAcceso(), BorderLayout.CENTER);
+		panelInferior.add(crearPanelAcciones(), BorderLayout.SOUTH);
+		panelDetalle.add(panelInferior, BorderLayout.SOUTH);
 
 		return panelDetalle;
 	}
 
+	private JPanel crearPanelEstadoAcceso() {
+		JPanel panelEstado = new JPanel(new GridLayout(3, 1, 0, 4));
+		panelEstado.setBorder(BorderFactory.createTitledBorder("Estado de acceso por embargo"));
+
+		lblEstadoAcceso = new JLabel("Estado de acceso: Acceso completo disponible");
+		lblTipoAcceso = new JLabel("Tipo de acceso: Normal");
+		lblFechaAccesoEmbargo = new JLabel("Fecha de acceso por embargo: -");
+
+		panelEstado.add(lblEstadoAcceso);
+		panelEstado.add(lblTipoAcceso);
+		panelEstado.add(lblFechaAccesoEmbargo);
+		return panelEstado;
+	}
+
 	private JPanel crearPanelTexto() {
 		JPanel panelTexto = new JPanel(new BorderLayout(0, 8));
-		panelTexto.setBorder(BorderFactory.createTitledBorder("Texto del reportaje"));
+		panelTexto.setBorder(BorderFactory.createTitledBorder("Texto visible del reportaje"));
 
 		JPanel panelCampos = new JPanel(new GridLayout(2, 1, 0, 6));
 
@@ -143,7 +164,7 @@ public class AccederReportajeView extends JFrame {
 
 	private JPanel crearPanelMultimedia() {
 		JPanel panelMultimedia = new JPanel(new BorderLayout());
-		panelMultimedia.setBorder(BorderFactory.createTitledBorder("Multimedia definitivo asociado"));
+		panelMultimedia.setBorder(BorderFactory.createTitledBorder("Multimedia asociado"));
 
 		JPanel panelPreviews = new JPanel(new GridLayout(1, 2, 10, 0));
 		panelPreviews.add(crearPanelPreviewFotos());
@@ -160,7 +181,7 @@ public class AccederReportajeView extends JFrame {
 		lblPreviewFotos = new JLabel(
 			"<html><div style='text-align:center; padding:12px;'>"
 				+ "Aqui se mostraran las fotos<br/>"
-				+ "definitivas del reportaje."
+				+ "si el acceso lo permite."
 				+ "</div></html>",
 			SwingConstants.CENTER);
 		lblPreviewFotos.setBorder(BorderFactory.createEtchedBorder());
@@ -176,7 +197,7 @@ public class AccederReportajeView extends JFrame {
 		lblPreviewVideos = new JLabel(
 			"<html><div style='text-align:center; padding:12px;'>"
 				+ "Aqui se mostraran los videos<br/>"
-				+ "definitivos del reportaje."
+				+ "si el acceso lo permite."
 				+ "</div></html>",
 			SwingConstants.CENTER);
 		lblPreviewVideos.setBorder(BorderFactory.createEtchedBorder());

@@ -1,15 +1,19 @@
 package app.controller;
 
-import giis.demo.util.SwingUtil;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
+
 import app.dto.EventoDisplayDTO;
 import app.dto.ReporteroDisplayDTO;
 import app.model.AsignacionReporterosModel;
 import app.view.AsignarReporterosView;
+import giis.demo.util.SwingUtil;
 
 public class AsignacionReporterosController {
 
@@ -35,10 +39,10 @@ public class AsignacionReporterosController {
 
     public void initController() {
         view.getCbFiltroEventos().addActionListener(e -> SwingUtil.exceptionWrapper(() -> cargarEventosPorFiltro()));
-        view.getCbFiltroTematicaReporteros().addActionListener(
-                e -> SwingUtil.exceptionWrapper(() -> cargarDetallesEvento()));
-        view.getCbFiltroTipoReportero().addActionListener(
-                e -> SwingUtil.exceptionWrapper(() -> cargarDetallesEvento()));
+        view.getCbFiltroTematicaReporteros()
+                .addActionListener(e -> SwingUtil.exceptionWrapper(() -> cargarDetallesEvento()));
+        view.getCbFiltroTipoReportero().addActionListener(e -> SwingUtil.exceptionWrapper(() -> cargarDetallesEvento()));
+        view.getChkEsFreelance().addActionListener(e -> SwingUtil.exceptionWrapper(() -> cargarDetallesEvento()));
 
         view.getTabEventos().addMouseListener(new MouseAdapter() {
             @Override
@@ -106,9 +110,10 @@ public class AsignacionReporterosController {
             String fechaFin = (String) view.getTabEventos().getValueAt(filaSeleccionada, 3);
             boolean soloEspecializados = view.getCbFiltroTematicaReporteros().getSelectedIndex() == 1;
             String tipoReportero = (String) view.getCbFiltroTipoReportero().getSelectedItem();
+            boolean soloFreelance = view.getChkEsFreelance().isSelected();
 
             reporterosDisponiblesVisualmente = model.getReporterosDisponibles(fechaInicio, fechaFin, nombreAgencia,
-                    idEvento, soloEspecializados, tipoReportero);
+                    idEvento, soloEspecializados, tipoReportero, soloFreelance);
             reporterosAsignadosVisualmente = model.getReporterosAsignados(idEvento);
             eventoFinalizadoSeleccionado = model.isAsignacionFinalizada(idEvento);
             responsableSeleccionadoId = obtenerResponsableDeAsignados(reporterosAsignadosVisualmente);
@@ -124,8 +129,8 @@ public class AsignacionReporterosController {
 
     private void moverReporteroAAsignados() {
         if (eventoFinalizadoSeleccionado) {
-            SwingUtil.showMessage("La asignación está finalizada y no puede modificarse.", "Aviso",
-                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            SwingUtil.showMessage("La asignacion esta finalizada y no puede modificarse.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
         int filaEvento = view.getTabEventos().getSelectedRow();
@@ -133,7 +138,7 @@ public class AsignacionReporterosController {
 
         if (filaEvento == -1 || filasReporteros.length == 0) {
             SwingUtil.showMessage("Debes seleccionar un evento y al menos un reportero disponible.", "Aviso",
-                    javax.swing.JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -152,8 +157,8 @@ public class AsignacionReporterosController {
 
     private void moverReporteroADisponibles() {
         if (eventoFinalizadoSeleccionado) {
-            SwingUtil.showMessage("La asignación está finalizada y no puede modificarse.", "Aviso",
-                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            SwingUtil.showMessage("La asignacion esta finalizada y no puede modificarse.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
         int filaEvento = view.getTabEventos().getSelectedRow();
@@ -161,7 +166,7 @@ public class AsignacionReporterosController {
 
         if (filaEvento == -1 || filasReporteros.length == 0) {
             SwingUtil.showMessage("Debes seleccionar un evento y al menos un reportero asignado para eliminar.", "Aviso",
-                    javax.swing.JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -181,55 +186,84 @@ public class AsignacionReporterosController {
     private void confirmarAsignacion() {
         int filaEvento = view.getTabEventos().getSelectedRow();
 
-        if (filaEvento >= 0) {
-            Integer idEvento = (Integer) view.getTabEventos().getValueAt(filaEvento, 0);
-            if (model.isAsignacionFinalizada(idEvento)) {
-                SwingUtil.showMessage("La asignación ya está finalizada. No se puede modificar.", "Aviso",
-                        javax.swing.JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            if (reporterosAsignadosVisualmente.isEmpty()) {
-                SwingUtil.showMessage("Debe haber al menos un reportero asignado para finalizar.", "Aviso",
-                        javax.swing.JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            if (!hayAlMenosUnReporteroBase()) {
-                SwingUtil.showMessage("Debe haber al menos un reportero de tipo BASE asignado al evento.", "Aviso",
-                        javax.swing.JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            if (responsableSeleccionadoId == null || !contieneReporteroAsignado(responsableSeleccionadoId)) {
-                SwingUtil.showMessage(
-                        "Debes elegir un reportero responsable desde la zona de responsable.",
-                        "Aviso", javax.swing.JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            if (!hayCambiosRespectoAlEstadoOriginal()) {
-                SwingUtil.showMessage("No hay cambios pendientes. Modifica la asignación antes de finalizar.", "Aviso",
-                        javax.swing.JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            model.eliminarAsignacionesPorEvento(idEvento);
-
-            for (ReporteroDisplayDTO rep : reporterosAsignadosVisualmente) {
-                boolean esResponsable = rep.getIdReportero().equals(responsableSeleccionadoId);
-                model.guardarAsignacion(idEvento, rep.getIdReportero(), esResponsable, "ABIERTA");
-            }
-
-            model.actualizarFinalizacionEvento(idEvento, responsableSeleccionadoId);
-
-            javax.swing.JOptionPane.showMessageDialog(null,
-                    "¡Asignación del evento finalizada correctamente! Ya no se podrán modificar reporteros de este evento.");
-            view.getFrame().dispose();
-        } else {
-            javax.swing.JOptionPane.showMessageDialog(null, "Selecciona un evento para confirmar.");
+        if (filaEvento < 0) {
+            JOptionPane.showMessageDialog(null, "Selecciona un evento para confirmar.");
+            return;
         }
+
+        Integer idEvento = (Integer) view.getTabEventos().getValueAt(filaEvento, 0);
+        if (model.isAsignacionFinalizada(idEvento)) {
+            SwingUtil.showMessage("La asignacion ya esta finalizada. No se puede modificar.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (reporterosAsignadosVisualmente.isEmpty()) {
+            SwingUtil.showMessage("Debe haber al menos un reportero asignado para finalizar.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!hayAlMenosUnReporteroBase()) {
+            SwingUtil.showMessage("Debe haber al menos un reportero de tipo BASE asignado al evento.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (hayFreelanceDudandoAsignado()) {
+            SwingUtil.showMessage(
+                    "No se puede finalizar la asignacion porque hay un freelance asignado con estado DUDANDO.",
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (responsableSeleccionadoId == null || !contieneReporteroAsignado(responsableSeleccionadoId)) {
+            SwingUtil.showMessage("Debes elegir un reportero responsable desde la zona de responsable.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!hayCambiosRespectoAlEstadoOriginal()) {
+            SwingUtil.showMessage("No hay cambios pendientes. Modifica la asignacion antes de finalizar.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        model.eliminarAsignacionesPorEvento(idEvento);
+
+        List<ReporteroDisplayDTO> freelanceAsignados = new ArrayList<>();
+        for (ReporteroDisplayDTO rep : reporterosAsignadosVisualmente) {
+            boolean esResponsable = rep.getIdReportero().equals(responsableSeleccionadoId);
+            model.guardarAsignacion(idEvento, rep.getIdReportero(), esResponsable, "ABIERTA");
+            if (rep.isFreelance()) {
+                freelanceAsignados.add(rep);
+            }
+        }
+
+        model.actualizarFinalizacionEvento(idEvento, responsableSeleccionadoId);
+
+        if (!freelanceAsignados.isEmpty()) {
+            String nombres = freelanceAsignados.stream()
+                    .map(ReporteroDisplayDTO::getNombre)
+                    .collect(Collectors.joining(", "));
+            SwingUtil.showMessage("Se ha notificado por email a los freelance asignados: " + nombres + ".",
+                    "Email enviado", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        JOptionPane.showMessageDialog(null,
+                "Asignacion del evento finalizada correctamente. Ya no se podran modificar reporteros de este evento.");
+        view.getFrame().dispose();
     }
 
     private boolean hayAlMenosUnReporteroBase() {
         for (ReporteroDisplayDTO rep : reporterosAsignadosVisualmente) {
-            if (rep.getTipoReportero() != null && "BASE".equalsIgnoreCase(rep.getTipoReportero().trim())) {
+            if (!rep.isFreelance() && rep.getTipoReportero() != null
+                    && "BASE".equalsIgnoreCase(rep.getTipoReportero().trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hayFreelanceDudandoAsignado() {
+        for (ReporteroDisplayDTO rep : reporterosAsignadosVisualmente) {
+            if (rep.isFreelance() && rep.getEstadoPreferencia() != null
+                    && "DUDANDO".equalsIgnoreCase(rep.getEstadoPreferencia().trim())) {
                 return true;
             }
         }
@@ -246,14 +280,14 @@ public class AsignacionReporterosController {
 
     private void elegirResponsable() {
         if (eventoFinalizadoSeleccionado) {
-            SwingUtil.showMessage("La asignación está finalizada y no puede modificarse.", "Aviso",
-                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            SwingUtil.showMessage("La asignacion esta finalizada y no puede modificarse.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
         int filaResponsable = view.getTabAsignados().getSelectedRow();
         if (filaResponsable < 0 || filaResponsable >= reporterosAsignadosVisualmente.size()) {
             SwingUtil.showMessage("Selecciona un reportero de la tabla de asignados para marcarlo como responsable.",
-                    "Aviso", javax.swing.JOptionPane.WARNING_MESSAGE);
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
         responsableSeleccionadoId = reporterosAsignadosVisualmente.get(filaResponsable).getIdReportero();
@@ -310,7 +344,7 @@ public class AsignacionReporterosController {
 
     private void actualizarTablaAsignadosVisualmente() {
         TableModel tmodel = SwingUtil.getTableModelFromPojos(reporterosAsignadosVisualmente,
-                new String[] { "idReportero", "nombre", "tipoReportero", "tematicas" });
+                new String[] { "idReportero", "nombre", "tipoReportero", "estadoPreferencia", "tematicas" });
         view.getTabAsignados().setModel(tmodel);
         view.getTabAsignados().getColumnModel().getColumn(0).setMinWidth(0);
         view.getTabAsignados().getColumnModel().getColumn(0).setMaxWidth(0);
@@ -322,7 +356,7 @@ public class AsignacionReporterosController {
 
     private void actualizarTablaDisponiblesVisualmente() {
         TableModel tmodel = SwingUtil.getTableModelFromPojos(reporterosDisponiblesVisualmente,
-                new String[] { "idReportero", "nombre", "tipoReportero", "tematicas" });
+                new String[] { "idReportero", "nombre", "tipoReportero", "estadoPreferencia", "tematicas" });
         view.getTabDisponibles().setModel(tmodel);
         view.getTabDisponibles().getColumnModel().getColumn(0).setMinWidth(0);
         view.getTabDisponibles().getColumnModel().getColumn(0).setMaxWidth(0);
