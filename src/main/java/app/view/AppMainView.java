@@ -45,6 +45,7 @@ public class AppMainView {
 	private JButton btnAccederReportajes; // Historia 33529
     private JButton btnInformeReportajes; // NUEVO BOTÓN: Historia 34083
     private JButton btnInformeIngresos;
+    private JButton btnFinalizarReportaje;
 	
 	// Botones de Base de Datos
 	private JButton btnCrearBD;
@@ -179,7 +180,9 @@ public class AppMainView {
 		
 		btnEscogerEventoFreelance = new JButton("Escoger evento freelance");
 		panelBotonesReportero.add(btnEscogerEventoFreelance);
-
+		
+		btnFinalizarReportaje = new JButton("Finalizar reportaje");
+		panelBotonesReportero.add(btnFinalizarReportaje);
 
 		// Columna 2: Botones de Agente de Prensa
 		JPanel panelBotonesAgente = new JPanel(new GridLayout(0, 1, 0, 10));
@@ -260,6 +263,10 @@ public class AppMainView {
 	
 	public void addEscogerEventoFreelanceListener(ActionListener listener) {
 	    btnEscogerEventoFreelance.addActionListener(listener);
+	}
+	
+	public void addFinalizarReportajeListener(ActionListener listener) {
+		btnFinalizarReportaje.addActionListener(listener);
 	}
 
 
