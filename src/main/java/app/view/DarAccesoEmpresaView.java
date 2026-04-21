@@ -20,10 +20,12 @@ public class DarAccesoEmpresaView extends JFrame {
 	private JTable tabEmpresas;
 	private JButton btnDarAcceso;
 	private JButton btnQuitarAcceso;
+	private JButton btnDarAccesoEspecial;
 	private JButton btnCancelar;
 	private JButton btnAceptar;
 	private JComboBox<String> cbFiltroAcceso;
 	private JComboBox<String> cbFiltroPago;
+	private JComboBox<String> cbFiltroEmbargo;
 
 	// El JLabel arriba para poder cambiarlo desde el Controlador
 	private JLabel lblNombreAgencia;
@@ -93,6 +95,19 @@ public class DarAccesoEmpresaView extends JFrame {
 		cbFiltroPago.setBounds(770, 92, 320, 25);
 		contentPane.add(cbFiltroPago);
 
+		JLabel lblFiltroEmbargo = new JLabel("Filtro embargo:");
+		lblFiltroEmbargo.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblFiltroEmbargo.setBounds(10, 64, 120, 20);
+		contentPane.add(lblFiltroEmbargo);
+
+		cbFiltroEmbargo = new JComboBox<>(new String[] {
+				"Todos",
+				"Con embargo activo",
+				"Sin embargo"
+		});
+		cbFiltroEmbargo.setBounds(140, 62, 220, 25);
+		contentPane.add(cbFiltroEmbargo);
+
 		JLabel lblTituloEmpresas = new JLabel("Empresas");
 		lblTituloEmpresas.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		lblTituloEmpresas.setBounds(620, 129, 208, 14);
@@ -113,6 +128,10 @@ public class DarAccesoEmpresaView extends JFrame {
 		btnQuitarAcceso.setBounds(1020, 550, 240, 32);
 		contentPane.add(btnQuitarAcceso);
 
+		btnDarAccesoEspecial = new JButton("Dar Acceso Especial");
+		btnDarAccesoEspecial.setBounds(620, 590, 240, 32);
+		contentPane.add(btnDarAccesoEspecial);
+
 		btnCancelar = new JButton("Cancelar");
 		btnCancelar.setBounds(1149, 629, 111, 23);
 		contentPane.add(btnCancelar);
@@ -126,10 +145,12 @@ public class DarAccesoEmpresaView extends JFrame {
 	public JTable getTabEmpresas() { return tabEmpresas; }
 	public JButton getBtnDarAcceso() { return btnDarAcceso; }
 	public JButton getBtnQuitarAcceso() { return btnQuitarAcceso; }
+	public JButton getBtnDarAccesoEspecial() { return btnDarAccesoEspecial; }
 	public JButton getBtnCancelar() { return btnCancelar; }
 	public JButton getBtnAceptar() { return btnAceptar; }
 	public JComboBox<String> getCbFiltroAcceso() { return cbFiltroAcceso; }
 	public JComboBox<String> getCbFiltroPago() { return cbFiltroPago; }
+	public JComboBox<String> getCbFiltroEmbargo() { return cbFiltroEmbargo; }
 	public JFrame getFrame() { return this; }
 	public JLabel getLblTituloAgencia() { return this.lblNombreAgencia; }
 }

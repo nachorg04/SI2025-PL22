@@ -8,6 +8,8 @@ public class EventoDisplayDTO {
 	private String fechaFin;
 	private String tematicas;
 	private String finalizado;
+	private String fechaFinEmbargo;
+	private String estadoEmbargo;
 
 	public Integer getIdEvento() { return idEvento; }
 	public void setIdEvento(Integer idEvento) { this.idEvento = idEvento; }
@@ -32,4 +34,11 @@ public class EventoDisplayDTO {
 
 	public String getFinalizado() { return finalizado; }
 	public void setFinalizado(String finalizado) { this.finalizado = finalizado; }
+
+	public String getFechaFinEmbargo() { return fechaFinEmbargo; }
+	public void setFechaFinEmbargo(String fechaFinEmbargo) { this.fechaFinEmbargo = fechaFinEmbargo; }
+	public void setFecha_fin_embargo(String fecha_fin_embargo) { this.fechaFinEmbargo = fecha_fin_embargo; }
+
+	public String getEstadoEmbargo() { return estadoEmbargo; }
+	public void setEstadoEmbargo(String estadoEmbargo) { this.estadoEmbargo = estadoEmbargo; }
 }

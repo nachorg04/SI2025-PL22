@@ -13,6 +13,10 @@ public class DarAccesoEmpresaModel {
 	public List<EventoDisplayDTO> getEventosConReportaje(String nombreAgencia) {
 		String sql = "SELECT e.id_evento, e.descripcion, e.fecha, "
 				+ "CASE WHEN COALESCE(e.finalizado, 0) = 1 THEN 'SÍ' ELSE 'NO' END AS finalizado, "
+				+ "r.fecha_fin_embargo AS fechaFinEmbargo, "
+				+ "CASE "
+				+ "WHEN r.fecha_fin_embargo IS NOT NULL AND datetime(r.fecha_fin_embargo) > CURRENT_TIMESTAMP THEN 'CON EMBARGO' "
+				+ "ELSE 'SIN EMBARGO' END AS estadoEmbargo, "
 				+ "COALESCE(GROUP_CONCAT(DISTINCT t.nombre), 'Sin temática') AS tematicas "
 				+ "FROM Evento e "
 				+ "JOIN Agencia a ON e.id_agencia = a.id_agencia "
@@ -59,6 +63,26 @@ public class DarAccesoEmpresaModel {
 		db.executeUpdate(sql, idEvento, idEmpresa);
 	}
 
+	public void concederAccesoEspecialEmbargo(Integer idEvento, Integer idEmpresa) {
+		if (idEvento == null || idEmpresa == null) {
+			throw new giis.demo.util.ApplicationException("Error interno: Los IDs están vacíos.");
+		}
+		if (!isEventoDistribuible(idEvento)) {
+			throw new giis.demo.util.ApplicationException(
+					"No se puede conceder acceso especial: el evento no está finalizado.");
+		}
+		if (!isEmbargoActivo(idEvento)) {
+			throw new giis.demo.util.ApplicationException(
+					"No se puede conceder acceso especial: el evento no tiene embargo activo o el embargo está caducado.");
+		}
+		if (!isEmpresaElegibleParaAcceso(idEvento, idEmpresa)) {
+			throw new giis.demo.util.ApplicationException(
+					"No se puede conceder acceso especial: la empresa no cumple estado de pago.");
+		}
+		String sql = "UPDATE Ofrecimiento SET acceso_especial_embargo = 1 WHERE id_evento = ? AND id_empresa = ?";
+		db.executeUpdate(sql, idEvento, idEmpresa);
+	}
+
 	public void revocarAcceso(Integer idEvento, Integer idEmpresa) {
 		if (idEvento == null || idEmpresa == null) {
 			throw new giis.demo.util.ApplicationException("Error interno: Los IDs están vacíos.");
@@ -85,6 +109,15 @@ public class DarAccesoEmpresaModel {
 				+ "AND ( (aet.id_empresa IS NOT NULL AND aet.al_corriente_pago = 1) "
 				+ "   OR (aet.id_empresa IS NULL AND CAST(COALESCE(o.reportaje_pagado, 0) AS INTEGER) = 1) )";
 		List<Object[]> rows = db.executeQueryArray(sql, idEvento, idEmpresa);
+		return rows != null && !rows.isEmpty() && ((Number) rows.get(0)[0]).intValue() > 0;
+	}
+
+	private boolean isEmbargoActivo(Integer idEvento) {
+		String sql = "SELECT COUNT(*) FROM Reportaje "
+				+ "WHERE id_evento = ? "
+				+ "AND fecha_fin_embargo IS NOT NULL "
+				+ "AND datetime(fecha_fin_embargo) > CURRENT_TIMESTAMP";
+		List<Object[]> rows = db.executeQueryArray(sql, idEvento);
 		return rows != null && !rows.isEmpty() && ((Number) rows.get(0)[0]).intValue() > 0;
 	}
 }
