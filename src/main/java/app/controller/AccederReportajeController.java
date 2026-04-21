@@ -65,20 +65,20 @@ public class AccederReportajeController {
         }
 
         int idEvento = (int) view.tableEventos.getValueAt(row, 0);
-        detalleActual = model.getDetalleUltimaVersion(idEvento);
+        detalleActual = model.getDetalleUltimaVersion(idEvento, nombreEmpresa);
 
         if (detalleActual == null) {
             limpiarDetalle();
             return;
         }
 
-        view.txtTitulo.setText(detalleActual.getTitulo());
-        view.txtSubtitulo.setText(detalleActual.getSubtitulo());
-        view.txtCuerpo.setText(detalleActual.getCuerpo());
-        view.lblFechaVersion.setText("Fecha: " + detalleActual.getFecha());
-        view.lblHoraVersion.setText("Hora: " + detalleActual.getHora());
-        view.lblPreviewFotos.setText(generarHtmlMultimedia("No hay fotos definitivas asociadas.", detalleActual.getFotos()));
-        view.lblPreviewVideos.setText(generarHtmlMultimedia("No hay videos definitivos asociados.", detalleActual.getVideos()));
+        if (detalleActual.isAccesoBloqueadoPorEmbargo()) {
+            aplicarVistaEmbargoSinAccesoEspecial();
+        } else if (detalleActual.isAccesoSoloTextoPorEmbargo()) {
+            aplicarVistaEmbargoConAccesoEspecial();
+        } else {
+            aplicarVistaAccesoCompleto();
+        }
     }
 
     private void limpiarDetalle() {
@@ -88,8 +88,12 @@ public class AccederReportajeController {
         view.txtCuerpo.setText("");
         view.lblFechaVersion.setText("Fecha: --/--/----");
         view.lblHoraVersion.setText("Hora: --:--");
+        view.lblEstadoAcceso.setText("Estado de acceso: Acceso completo disponible");
+        view.lblTipoAcceso.setText("Tipo de acceso: Normal");
+        view.lblFechaAccesoEmbargo.setText("Fecha de acceso por embargo: -");
         view.lblPreviewFotos.setText(generarHtmlMultimedia("No hay fotos definitivas asociadas.", null));
         view.lblPreviewVideos.setText(generarHtmlMultimedia("No hay videos definitivos asociados.", null));
+        view.btnDescargarJson.setEnabled(false);
     }
 
     private String generarHtmlMultimedia(String mensajeVacio, List<String> rutas) {
@@ -111,6 +115,12 @@ public class AccederReportajeController {
     private void descargarReportajeJson() {
         if (detalleActual == null) {
             SwingUtil.showMessage("Debes seleccionar un reportaje antes de descargarlo.", "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (!detalleActual.isAccesoCompleto()) {
+            SwingUtil.showMessage("Con embargo no caducado no se puede descargar el reportaje.", "Aviso",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -161,5 +171,58 @@ public class AccederReportajeController {
         json.put("fotos", detalleActual.getFotos());
         json.put("videos", detalleActual.getVideos());
         return json;
+    }
+
+    private void aplicarVistaAccesoCompleto() {
+        view.txtTitulo.setText(detalleActual.getTitulo());
+        view.txtSubtitulo.setText(detalleActual.getSubtitulo());
+        view.txtCuerpo.setText(detalleActual.getCuerpo());
+        view.lblFechaVersion.setText("Fecha: " + detalleActual.getFecha());
+        view.lblHoraVersion.setText("Hora: " + detalleActual.getHora());
+        view.lblEstadoAcceso.setText("Estado de acceso: Acceso completo disponible");
+        view.lblTipoAcceso.setText("Tipo de acceso: Normal");
+        view.lblFechaAccesoEmbargo.setText("Fecha de acceso por embargo: -");
+        view.lblPreviewFotos
+                .setText(generarHtmlMultimedia("No hay fotos definitivas asociadas.", detalleActual.getFotos()));
+        view.lblPreviewVideos
+                .setText(generarHtmlMultimedia("No hay videos definitivos asociados.", detalleActual.getVideos()));
+        view.btnDescargarJson.setEnabled(true);
+    }
+
+    private void aplicarVistaEmbargoSinAccesoEspecial() {
+        view.txtTitulo.setText("");
+        view.txtSubtitulo.setText("");
+        view.txtCuerpo.setText("");
+        view.lblFechaVersion.setText("Fecha: --/--/----");
+        view.lblHoraVersion.setText("Hora: --:--");
+        view.lblEstadoAcceso.setText("Estado de acceso: Bloqueado por embargo");
+        view.lblTipoAcceso.setText("Tipo de acceso: Sin acceso especial");
+        view.lblFechaAccesoEmbargo.setText("Fecha de acceso por embargo: -");
+        view.lblPreviewFotos.setText(generarHtmlBloqueo("Contenido multimedia bloqueado hasta que finalice el embargo."));
+        view.lblPreviewVideos.setText(generarHtmlBloqueo("Contenido multimedia bloqueado hasta que finalice el embargo."));
+        view.btnDescargarJson.setEnabled(false);
+
+        String mensaje = "No se puede acceder a este reportaje en este momento.\n"
+                + "El contenido se encuentra bajo embargo y estara disponible a partir de la fecha:\n\n"
+                + detalleActual.getFecha_fin_embargo();
+        SwingUtil.showMessage(mensaje, "Acceso denegado", JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void aplicarVistaEmbargoConAccesoEspecial() {
+        view.txtTitulo.setText(detalleActual.getTitulo());
+        view.txtSubtitulo.setText(detalleActual.getSubtitulo());
+        view.txtCuerpo.setText(detalleActual.getCuerpo());
+        view.lblFechaVersion.setText("Fecha: --/--/----");
+        view.lblHoraVersion.setText("Hora: --:--");
+        view.lblEstadoAcceso.setText("Estado de acceso: Previsualizacion disponible");
+        view.lblTipoAcceso.setText("Tipo de acceso: Especial por embargo");
+        view.lblFechaAccesoEmbargo.setText("Fecha de acceso por embargo: " + detalleActual.getFecha_fin_embargo());
+        view.lblPreviewFotos.setText(generarHtmlBloqueo("Con acceso especial solo puede verse el texto del reportaje."));
+        view.lblPreviewVideos.setText(generarHtmlBloqueo("Con acceso especial solo puede verse el texto del reportaje."));
+        view.btnDescargarJson.setEnabled(false);
+    }
+
+    private String generarHtmlBloqueo(String mensaje) {
+        return "<html><div style='text-align:center; padding:12px;'>" + mensaje + "</div></html>";
     }
 }
