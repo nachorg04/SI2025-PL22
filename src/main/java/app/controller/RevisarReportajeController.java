@@ -24,23 +24,51 @@ public class RevisarReportajeController {
         this.view.setVisible(true);
     }
 
+    
     private void initController() {
-        view.addSeleccionReportajeListener(e -> mostrarDetalleSeleccionado());
+        view.addSeleccionReportajeListener(e -> {
+            if (view.getComboReportajes().getSelectedItem() != null) {
+                view.getComboReportajesRevisados().setSelectedIndex(-1);
+            }
+            mostrarDetalleSeleccionado();
+        });
+        view.addSeleccionReportajeRevisadoListener(e -> {
+            if (view.getComboReportajesRevisados().getSelectedItem() != null) {
+                view.getComboReportajes().setSelectedIndex(-1);
+            }
+            mostrarDetalleSeleccionado();
+        });
         view.addAgregarComentarioListener(e -> agregarComentario());
         view.addMarcarRevisadoListener(e -> marcarRevisado());
     }
 
     private void cargarReportajes() {
         view.getComboReportajes().removeAllItems();
+        view.getComboReportajesRevisados().removeAllItems();
+
         List<RevisarReportajeDTO> reportajes = model.getReportajesParaRevision(reportero);
         for (RevisarReportajeDTO r : reportajes) {
             view.getComboReportajes().addItem(r);
         }
+
+        List<RevisarReportajeDTO> reportajesRevisados = model.getReportajesRevisadosPorReportero(reportero);
+        for (RevisarReportajeDTO r : reportajesRevisados) {
+            view.getComboReportajesRevisados().addItem(r);
+        }
+
+        if (view.getComboReportajes().getItemCount() > 0) {
+            view.getComboReportajes().setSelectedIndex(0);
+            view.getComboReportajesRevisados().setSelectedIndex(-1);
+        } else if (view.getComboReportajesRevisados().getItemCount() > 0) {
+            view.getComboReportajesRevisados().setSelectedIndex(0);
+            view.getComboReportajes().setSelectedIndex(-1);
+        }
+
         mostrarDetalleSeleccionado();
     }
 
     private void mostrarDetalleSeleccionado() {
-        RevisarReportajeDTO seleccionado = (RevisarReportajeDTO) view.getComboReportajes().getSelectedItem();
+        RevisarReportajeDTO seleccionado = getReportajeSeleccionado();
         if (seleccionado == null) {
             limpiarVista();
             return;
@@ -72,10 +100,11 @@ public class RevisarReportajeController {
               .append(c.getComentario()).append("\n\n");
         }
         view.setComentarios(sb.toString());
+ 
     }
 
     private void agregarComentario() {
-        RevisarReportajeDTO seleccionado = (RevisarReportajeDTO) view.getComboReportajes().getSelectedItem();
+        RevisarReportajeDTO seleccionado = getReportajeSeleccionado();
         if (seleccionado == null) {
             SwingUtil.showMessage("Debes seleccionar un reportaje.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
@@ -90,6 +119,7 @@ public class RevisarReportajeController {
         model.guardarComentario(seleccionado.getId_reportaje(), reportero, comentario.trim());
         view.limpiarNuevoComentario();
         recargarComentarios(seleccionado.getId_reportaje());
+   
     }
 
     private void marcarRevisado() {
@@ -99,9 +129,23 @@ public class RevisarReportajeController {
             return;
         }
 
-        model.marcarRevisado(seleccionado.getId_reportaje());
-        SwingUtil.showMessage("Reportaje marcado como REVISADO.", "Información", JOptionPane.INFORMATION_MESSAGE);
+       
+        boolean reportajeRevisado = model.marcarRevisado(seleccionado.getId_reportaje(), reportero);
+        if (reportajeRevisado) {
+            SwingUtil.showMessage("Reportaje marcado como REVISADO.", "Información", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            SwingUtil.showMessage("Tu revisión se ha guardado. El reportaje se marcará como REVISADO cuando terminen todos los reporteros asignados.",
+                    "Información", JOptionPane.INFORMATION_MESSAGE);
+        }
         cargarReportajes();
+    }
+
+    private RevisarReportajeDTO getReportajeSeleccionado() {
+        RevisarReportajeDTO pendiente = (RevisarReportajeDTO) view.getComboReportajes().getSelectedItem();
+        if (pendiente != null) {
+            return pendiente;
+        }
+        return (RevisarReportajeDTO) view.getComboReportajesRevisados().getSelectedItem();
     }
 
     private void limpiarVista() {

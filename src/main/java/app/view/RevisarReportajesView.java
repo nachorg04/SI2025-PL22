@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -24,6 +25,7 @@ public class RevisarReportajesView extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
+    private JComboBox<RevisarReportajeDTO> comboReportajesRevisados;
     private JComboBox<RevisarReportajeDTO> comboReportajes;
     private JTextField txtTitulo;
     private JTextField txtSubtitulo;
@@ -48,10 +50,20 @@ public class RevisarReportajesView extends JFrame {
         contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
         setContentPane(contentPane);
 
-        JPanel panelTop = new JPanel(new BorderLayout(8, 0));
-        panelTop.add(new JLabel("Reportaje a revisar:"), BorderLayout.WEST);
+        JPanel panelTop = new JPanel(new GridLayout(2, 1, 0, 6));
+
+        JPanel panelPorRevisar = new JPanel(new BorderLayout(8, 0));
+        panelPorRevisar.add(new JLabel("Reportajes por revisar:"), BorderLayout.WEST);
         comboReportajes = new JComboBox<>();
-        panelTop.add(comboReportajes, BorderLayout.CENTER);
+        panelPorRevisar.add(comboReportajes, BorderLayout.CENTER);
+        panelTop.add(panelPorRevisar);
+
+        JPanel panelRevisados = new JPanel(new BorderLayout(8, 0));
+        panelRevisados.add(new JLabel("Reportajes revisados:"), BorderLayout.WEST);
+        comboReportajesRevisados = new JComboBox<>();
+        panelRevisados.add(comboReportajesRevisados, BorderLayout.CENTER);
+        panelTop.add(panelRevisados);
+
         contentPane.add(panelTop, BorderLayout.NORTH);
 
         JPanel panelCenter = new JPanel(new GridLayout(1, 2, 10, 10));
@@ -151,6 +163,11 @@ public class RevisarReportajesView extends JFrame {
     public JComboBox<RevisarReportajeDTO> getComboReportajes() {
         return comboReportajes;
     }
+    
+
+    public JComboBox<RevisarReportajeDTO> getComboReportajesRevisados() {
+        return comboReportajesRevisados;
+    }
 
     public void setTitulo(String titulo) {
         txtTitulo.setText(titulo == null ? "" : titulo);
@@ -188,6 +205,10 @@ public class RevisarReportajesView extends JFrame {
         comboReportajes.addActionListener(listener);
     }
 
+
+    public void addSeleccionReportajeRevisadoListener(ActionListener listener) {
+        comboReportajesRevisados.addActionListener(listener);
+    }
     public void addAgregarComentarioListener(ActionListener listener) {
         btnAgregarComentario.addActionListener(listener);
     }

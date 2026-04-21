@@ -20,9 +20,22 @@ public class RevisarReportajeModel {
                 + "JOIN Evento e ON e.id_evento = r.id_evento "
                 + "JOIN Asignacion a ON a.id_evento = r.id_evento "
                 + "JOIN Reportero rep ON rep.id_reportero = a.id_reportero "
+                + "LEFT JOIN Revision_Reportero rr ON rr.id_reportaje = r.id_reportaje AND rr.id_reportero = rep.id_reportero "
                 + "WHERE rep.nombre = ? AND r.estado_revision = 'EN_REVISION' "
+                + "AND (rr.revision_finalizada IS NULL OR rr.revision_finalizada = false) "
                 + "ORDER BY r.id_reportaje";
 
+        return db.executeQueryPojo(RevisarReportajeDTO.class, sql, nombreReportero);
+    }
+
+    public List<RevisarReportajeDTO> getReportajesRevisadosPorReportero(String nombreReportero) {
+        String sql = "SELECT r.id_reportaje, e.descripcion AS evento, r.titulo, r.subtitulo, r.cuerpo, r.estado_revision "
+                + "FROM Reportaje r "
+                + "JOIN Evento e ON e.id_evento = r.id_evento "
+                + "JOIN Reportero rep ON rep.nombre = ? "
+                + "JOIN Revision_Reportero rr ON rr.id_reportaje = r.id_reportaje AND rr.id_reportero = rep.id_reportero "
+                + "WHERE rr.revision_finalizada = true "
+                + "ORDER BY rr.fecha_revision DESC, r.id_reportaje";
         return db.executeQueryPojo(RevisarReportajeDTO.class, sql, nombreReportero);
     }
 
@@ -51,9 +64,25 @@ public class RevisarReportajeModel {
                 + "VALUES (?, (SELECT id_reportero FROM Reportero WHERE nombre = ?), ?)";
         db.executeUpdate(sql, idReportaje, nombreReportero, comentario);
     }
+    public boolean marcarRevisado(int idReportaje, String nombreReportero) {
+        String sqlMarcarRevisionReportero = "INSERT INTO Revision_Reportero(id_reportaje, id_reportero, revision_finalizada, fecha_revision) "
+                + "VALUES (?, (SELECT id_reportero FROM Reportero WHERE nombre = ?), true, datetime('now')) "
+                + "ON CONFLICT(id_reportaje, id_reportero) DO UPDATE SET revision_finalizada = true, fecha_revision = datetime('now')";
+        db.executeUpdate(sqlMarcarRevisionReportero, idReportaje, nombreReportero);
 
-    public void marcarRevisado(int idReportaje) {
-        String sql = "UPDATE Reportaje SET estado_revision = 'REVISADO' WHERE id_reportaje = ?";
-        db.executeUpdate(sql, idReportaje);
+        String sqlActualizarEstado = "UPDATE Reportaje SET estado_revision = 'REVISADO' "
+                + "WHERE id_reportaje = ? "
+                + "AND NOT EXISTS ("
+                + "    SELECT 1 "
+                + "    FROM Asignacion a "
+                + "    LEFT JOIN Revision_Reportero rr "
+                + "        ON rr.id_reportaje = ? AND rr.id_reportero = a.id_reportero "
+                + "    WHERE a.id_evento = Reportaje.id_evento "
+                + "      AND (rr.revision_finalizada IS NULL OR rr.revision_finalizada = false)"
+                + ")";
+        db.executeUpdate(sqlActualizarEstado, idReportaje, idReportaje);
+
+        String sqlComprobarRevisado = "SELECT 1 FROM Reportaje WHERE id_reportaje = ? AND estado_revision = 'REVISADO'";
+        return !db.executeQueryArray(sqlComprobarRevisado, idReportaje).isEmpty();
     }
 }
